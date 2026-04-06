@@ -15,17 +15,23 @@ This project sets up Goose AI to work with a local Ollama instance accessing clo
 
 ```
 goose-ollama-minimax/
-├── .agents/
-│   └── skills/            # 31 integrated skills (auto-discovered)
-├── anthropic-skills/      # Original Anthropic skills repository  
-├── minimax-skills/        # Original MiniMax skills repository
-├── brave-search-mcp/      # Web search integration
-├── slides/               # PowerPoint generation workspace
-├── setup scripts/        # Installation and configuration
-├── run-goose.sh          # CLI launcher
-├── run-goose-ui.sh       # Desktop UI launcher
-└── documentation files   # Comprehensive guides
+├── 📂 .agents/
+│   └── skills/            # 31 auto-discovered skills
+├── 📂 scripts/
+│   ├── setup/            # Installation & configuration
+│   ├── run/              # Execution scripts
+│   └── utils/            # Maintenance & testing
+├── 📂 docs/
+│   ├── guides/           # Essential documentation
+│   └── archive/          # Historical docs
+├── 📂 config/            # Requirements & packages
+├── 📂 anthropic-skills/  # Anthropic skills repository  
+├── 📂 minimax-skills/    # MiniMax skills repository
+├── 📂 brave-search-mcp/  # Web search integration
+└── 📄 README.md          # This file
 ```
+
+**Quick Access:** Convenience symlinks in root for `setup.sh`, `run-goose.sh`, and `validate.sh`
 
 ## Available Skills
 
@@ -78,57 +84,57 @@ All skills are **automatically detected** by Goose based on your requests - no m
 ### New Installation
 1. **Install Goose AI** (Ubuntu 25.10+ with PEP 668)
    ```bash
-   ./install-goose-ai.sh          # Handles modern Python environments
+   scripts/setup/install-goose-ai.sh  # Handles modern Python environments
    ```
 
 2. **Complete Setup** (Installs everything)
    ```bash
-   ./install-all-dependencies.sh  # Full installation with all packages
+   scripts/setup/install-all-dependencies.sh  # Full installation
    ```
 
 3. **Configure Web Search** (Optional)
    ```bash
-   ./setup-brave-search.sh       # Setup Brave Search API
+   scripts/setup/setup-brave-search.sh  # Setup Brave Search API
    ```
 
 4. **Install Desktop UI** (Optional)
    ```bash
-   ./install-goose-ui.sh         # Install Goose Desktop application
+   scripts/setup/install-goose-ui.sh  # Install Goose Desktop
    ```
 
 5. **Validate Setup**
    ```bash
-   ./validate-setup.sh           # Comprehensive validation
+   ./validate.sh                 # Comprehensive validation (symlink)
    ```
 
 ### Existing Installation (If Goose AI already installed)
 1. **Basic Setup**
    ```bash
-   ./setup.sh                    # Uses requirements.txt
+   ./setup.sh                    # Quick setup (symlink)
    ```
 
 2. **Configure Latest Cloud Models** (New!)
    ```bash
-   ./configure-cloud-models.sh  # Setup 2025 cloud models (DeepSeek, Qwen, GPT-OSS)
+   scripts/setup/configure-cloud-models.sh  # Setup 2025 cloud models
    ```
 
 3. **Run Goose with Cloud Models**
    ```bash
    # Command Line Interface
-   ./run-goose.sh               # Auto-detect installation + current model
-   ./run-goose-local.sh         # Force user-local Goose AI (recommended)  
-   ./run-goose-system.sh        # Force system-wide installation
-   ./switch-model.sh            # Interactive model switcher
+   ./run-goose.sh               # Auto-detect and run (symlink)
+   scripts/run/run-goose-local.sh   # Force user-local Goose AI  
+   scripts/run/run-goose-system.sh  # Force system-wide installation
+   scripts/run/switch-model.sh      # Interactive model switcher
    
    # Desktop UI (if installed)
-   ./run-goose-ui.sh            # Launch Goose Desktop application
+   scripts/run/run-goose-ui.sh  # Launch Goose Desktop application
    ```
 
 4. **Check Skills Status**
    ```bash
-   python3 integrate-skills.py list           # List all 31 integrated skills
-   python3 test-enhanced-skills.py            # Test all 30 Python packages
-   ./validate-setup.sh                        # Complete system validation
+   python3 scripts/utils/integrate-skills.py list  # List all 31 skills
+   python3 scripts/utils/test-enhanced-skills.py   # Test Python packages
+   ./validate.sh                                   # Complete validation
    ```
 
 ## Configuration
@@ -228,26 +234,22 @@ Your enhanced Goose can now handle:
 ## 🔧 Maintenance Commands
 
 ```bash
-# Health & Performance
-./validate-setup.sh           # Full system validation (supports both installations)
-./health-check.sh             # Quick status check
-./monitor-performance.sh      # Performance monitoring
+# Quick Access (via symlinks)
+./setup.sh                    # Quick setup
+./run-goose.sh                # Auto-detect and run
+./validate.sh                 # Full system validation
 
-# Goose Installation & Model Management
-./run-goose.sh                # Auto-detect installation + show current model
-./run-goose-local.sh          # Force user-local Goose AI
-./run-goose-system.sh         # Force system-wide installation
-./configure-cloud-models.sh   # Setup latest 2025 cloud models
-./switch-model.sh             # Interactive model switcher
+# All Scripts
+scripts/setup/                # Installation & configuration scripts
+scripts/run/                  # Execution scripts
+scripts/utils/                # Utilities & maintenance
 
 # Skills Management  
-./goose-skills.sh             # Interactive skills manager
-python3 integrate-anthropic-skills.py list
-python3 integrate-skills.py list
+python3 scripts/utils/integrate-skills.py list
+python3 scripts/utils/test-enhanced-skills.py
 
 # Optimization
-./optimize-setup.sh           # Apply performance optimizations
-source ollama-env.sh          # Load environment optimizations
+scripts/utils/optimize-setup.sh  # Apply performance optimizations
 ```
 
 ## System Architecture
