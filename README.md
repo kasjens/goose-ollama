@@ -9,7 +9,7 @@ This project sets up Goose AI to work with a local Ollama instance accessing clo
 - **Ollama** installed and signed in (`ollama signin`)
 - **Python 3.8+** for skill dependencies  
 - **Internet connection** for cloud model access
-- **Goose AI** will be installed automatically by setup scripts
+- **Goose AI** (CLI + Desktop UI) will be installed automatically
 
 ## Project Structure
 
@@ -72,7 +72,12 @@ goose-ollama-minimax/
    ./setup-brave-search.sh       # Setup Brave Search API
    ```
 
-4. **Validate Setup**
+4. **Install Desktop UI** (Optional)
+   ```bash
+   ./install-goose-ui.sh         # Install Goose Desktop application
+   ```
+
+5. **Validate Setup**
    ```bash
    ./validate-setup.sh           # Comprehensive validation
    ```
@@ -90,10 +95,14 @@ goose-ollama-minimax/
 
 3. **Run Goose with Cloud Models**
    ```bash
+   # Command Line Interface
    ./run-goose.sh               # Auto-detect installation + current model
    ./run-goose-local.sh         # Force user-local Goose AI (recommended)  
    ./run-goose-system.sh        # Force system-wide installation
    ./switch-model.sh            # Interactive model switcher
+   
+   # Desktop UI (if installed)
+   ./run-goose-ui.sh            # Launch Goose Desktop application
    ```
 
 4. **Manage All Skills**
