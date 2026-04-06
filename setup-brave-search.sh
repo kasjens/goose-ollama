@@ -42,74 +42,75 @@ echo "Adding Brave Search to Goose configuration..."
 # Create a temporary file with the new extension
 cat > /tmp/brave-search-extension.yaml << EOF
   brave-search:
-    enabled: true
-    type: stdio
     name: brave-search
-    description: Web and news search powered by Brave Search API
-    display_name: Brave Search
-    command: node
-    args: ["/home/kasjens/projects/goose-ollama-minimax/brave-search-mcp/index.js"]
-    environment:
+    cmd: npx
+    args:
+      - -y
+      - "@brave/brave-search-mcp-server"
+    enabled: true
+    envs:
       BRAVE_API_KEY: "$BRAVE_API_KEY"
+    type: stdio
     timeout: 300
-    bundled: false
-    available_tools: ["brave_web_search", "brave_news_search"]
 EOF
 
 # Check if brave-search already exists in config
 if grep -q "brave-search:" ~/.config/goose/config.yaml 2>/dev/null; then
-    echo "Brave Search extension already exists. Updating..."
-    # Remove old brave-search config (this is complex, so we'll just notify)
-    echo "⚠️  Please manually remove the old brave-search section from ~/.config/goose/config.yaml"
-    echo "Then re-run this script."
+    echo "✅ Brave Search extension already configured"
 else
-    # Append the new extension
-    cat /tmp/brave-search-extension.yaml >> ~/.config/goose/config.yaml
+    # Insert the extension into the extensions section (before GOOSE_TELEMETRY_ENABLED)
+    if grep -q "GOOSE_TELEMETRY_ENABLED:" ~/.config/goose/config.yaml 2>/dev/null; then
+        # Insert before GOOSE_TELEMETRY_ENABLED
+        sed -i '/GOOSE_TELEMETRY_ENABLED:/i\  brave-search:\
+    name: brave-search\
+    cmd: npx\
+    args:\
+      - -y\
+      - "@brave/brave-search-mcp-server"\
+    enabled: true\
+    envs:\
+      BRAVE_API_KEY: "'$BRAVE_API_KEY'"\
+    type: stdio\
+    timeout: 300' ~/.config/goose/config.yaml
+    else
+        # Append to end of extensions section  
+        cat /tmp/brave-search-extension.yaml >> ~/.config/goose/config.yaml
+    fi
     echo "✅ Brave Search extension added to Goose config"
 fi
 
 # Clean up
 rm -f /tmp/brave-search-extension.yaml
 
-# Test the MCP server
+# Test the official Brave Search MCP server
 echo ""
-echo "Testing Brave Search MCP server..."
-cd /home/kasjens/projects/goose-ollama-minimax/brave-search-mcp
+echo "Testing official Brave Search MCP server..."
 export BRAVE_API_KEY="$BRAVE_API_KEY"
 
-# Create a test script
-cat > test-server.js << 'EOF'
-import fetch from 'node-fetch';
-
-const apiKey = process.env.BRAVE_API_KEY;
-const testQuery = "test query";
-
-console.log("Testing Brave Search API...");
-console.log("API Key length:", apiKey ? apiKey.length : 0);
-
-fetch(`https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(testQuery)}&count=1`, {
-  headers: {
-    'Accept': 'application/json',
-    'X-Subscription-Token': apiKey,
-  },
-})
-  .then(response => {
-    console.log("Response status:", response.status);
-    if (response.ok) {
-      console.log("✅ Brave Search API is working!");
-    } else {
-      console.log("❌ API error:", response.statusText);
-    }
-    process.exit(response.ok ? 0 : 1);
-  })
-  .catch(error => {
-    console.log("❌ Connection error:", error.message);
-    process.exit(1);
-  });
-EOF
-
-node test-server.js
-TEST_RESULT=$?
+# Test if the official server loads
+echo "Checking if @brave/brave-search-mcp-server is available..."
+if timeout 3 npx -y @brave/brave-search-mcp-server < /dev/null > /dev/null 2>&1; then
+    echo "✅ Official Brave Search MCP server is working!"
+    TEST_RESULT=0
+else
+    echo "⚠️  Official server test inconclusive (this is normal)"
+    # Test API directly as fallback
+    echo "Testing Brave Search API directly..."
+    RESPONSE=$(curl -s -w "%{http_code}" \
+        -H "Accept: application/json" \
+        -H "X-Subscription-Token: $BRAVE_API_KEY" \
+        "https://api.search.brave.com/res/v1/web/search?q=test&count=1" \
+        -o /dev/null)
+    
+    echo "Response status: $RESPONSE"
+    if [ "$RESPONSE" = "200" ]; then
+        echo "✅ Brave Search API is working!"
+        TEST_RESULT=0
+    else
+        echo "❌ API test failed with status: $RESPONSE"
+        TEST_RESULT=1
+    fi
+fi
 
 rm -f test-server.js
 
@@ -131,9 +132,10 @@ if [ $TEST_RESULT -eq 0 ]; then
     echo "2. Ask Goose to search the web"
     echo ""
     echo "Examples:"
-    echo "  🪿 Search the web for React best practices 2024"
-    echo "  🪿 Find recent news about artificial intelligence"
-    echo "  🪿 What are the latest Python 3.13 features?"
+    echo "  🪿 search the web for React best practices 2024"
+    echo "  🪿 search for the latest AI news"
+    echo "  🪿 find news about artificial intelligence"
+    echo "  🪿 search for Python 3.13 features"
 else
     echo "⚠️  Setup completed but API test failed"
     echo "============================================"
