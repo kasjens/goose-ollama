@@ -6,6 +6,22 @@ Works on **Windows 11 (native PowerShell)**, **WSL2 Ubuntu**, and **standalone U
 
 ---
 
+## Prerequisites: Ollama Account (Free)
+
+Before installing, sign up for a free Ollama account to access cloud models:
+
+1. Go to [ollama.com](https://ollama.com) and click **Sign Up**
+2. Create an account (email or GitHub)
+3. The free tier includes access to cloud models like `minimax-m2.7:cloud`, `deepseek-v3.1:671b`, `qwen3-coder:480b`, and more
+4. Free tier has usage limits that reset every 5 hours (session) and 7 days (weekly)
+5. No GPU or powerful hardware needed - cloud models run on Ollama's servers
+
+During setup, you'll be prompted to run `ollama signin` which links your local install to your account.
+
+See [Ollama Cloud pricing](https://ollama.com/pricing) for plan details.
+
+---
+
 ## Installation Guide
 
 ### Option A: Windows 11 (Native PowerShell)
