@@ -63,7 +63,7 @@ if [ -f "$VENV_DIR/bin/activate" ]; then
 fi
 
 export GOOSE_PROVIDER=ollama
-export GOOSE_MODEL=minimax-m2.7:cloud
+export GOOSE_MODEL=qwen3.5:cloud
 
 # Run Goose session with system installation
 "$SYSTEM_GOOSE" session --name minimax-ollama-system 2>/dev/null || {

@@ -126,17 +126,24 @@ if ($models -match ":cloud") {
     }
 }
 
-# -- 5. Pull default model ---------------------------------------------------
-Step 5 "Ensuring default model is available..."
+# -- 5. Pull cloud models ----------------------------------------------------
+Step 5 "Pulling cloud models..."
 
 $ErrorActionPreference = "Continue"
 $models = ollama list 2>&1 | Out-String
-if ($models -match "minimax-m2\.7:cloud") {
-    Ok "minimax-m2.7:cloud already pulled"
-} else {
-    Write-Host "  Pulling minimax-m2.7:cloud ..."
-    ollama pull minimax-m2.7:cloud 2>&1 | Out-Null
-    Ok "Model pulled"
+$cloudModels = @(
+    @{ name = "qwen3.5:cloud";         desc = "Qwen 3.5 (multimodal, default)" }
+    @{ name = "gemma4:31b-cloud";       desc = "Gemma 4 31B (multimodal, 256K context)" }
+    @{ name = "minimax-m2.7:cloud";     desc = "MiniMax M2.7 (text only)" }
+)
+foreach ($m in $cloudModels) {
+    if ($models -match [regex]::Escape($m.name)) {
+        Ok "$($m.name) already pulled"
+    } else {
+        Write-Host "  Pulling $($m.name) ($($m.desc))..."
+        ollama pull $m.name 2>&1 | Out-Null
+        Ok "$($m.name) pulled"
+    }
 }
 $ErrorActionPreference = "Stop"
 
@@ -269,7 +276,7 @@ if (-not (Test-Path $configPath)) {
 extensions:
 GOOSE_TELEMETRY_ENABLED: true
 GOOSE_PROVIDER: ollama
-GOOSE_MODEL: minimax-m2.7:cloud
+GOOSE_MODEL: qwen3.5:cloud
 "@ | Set-Content $configPath
     }
     Ok "Goose config created at $configPath"

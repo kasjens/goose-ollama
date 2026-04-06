@@ -55,7 +55,7 @@ This will:
 - Install Ollama (via official PowerShell installer)
 - Start the Ollama service
 - Prompt you to sign in to Ollama cloud (`ollama signin`)
-- Pull the `minimax-m2.7:cloud` model
+- Pull 3 cloud models (Qwen 3.5, Gemma 4, MiniMax M2.7)
 - Create a Python virtual environment with core dependencies
 - Clone and integrate 31 skills
 - Install the Goose AI CLI
@@ -125,7 +125,7 @@ This will:
 - Install Ollama
 - Start the Ollama service
 - Prompt you to sign in to Ollama cloud (`ollama signin`)
-- Pull the `minimax-m2.7:cloud` model
+- Pull 3 cloud models (Qwen 3.5, Gemma 4, MiniMax M2.7)
 - Create a Python venv in the native Linux filesystem (avoids NTFS issues)
 - Clone and integrate 31 skills
 - Install the Goose AI CLI (Linux binary, avoids WSL2 misdetection)
@@ -170,6 +170,33 @@ cd goose-ollama-minimax
 ```
 
 Everything works the same as WSL2, except the Python venv is created in the project directory (`./venv/`) instead of `~/.local/share/`.
+
+---
+
+## Cloud Models
+
+Setup pulls 3 cloud models automatically. No GPU or large downloads needed - inference runs on Ollama's servers.
+
+| Model | Default | Vision | Context | Description |
+|-------|---------|--------|---------|-------------|
+| `qwen3.5:cloud` | Yes | Yes | 128K | Qwen 3.5 - fast, multimodal, strong coding |
+| `gemma4:31b-cloud` | | Yes | 256K | Google Gemma 4 31B - large context, multimodal |
+| `minimax-m2.7:cloud` | | No | 128K | MiniMax M2.7 - balanced text generation |
+
+**Switch models** in the Goose Desktop UI via Settings, or edit the config file:
+
+```yaml
+# ~/.config/goose/config.yaml (WSL2/Ubuntu)
+# %USERPROFILE%\.config\goose\config.yaml (Windows)
+GOOSE_MODEL: gemma4:31b-cloud
+```
+
+**Pull additional models** from [ollama.com/search?c=cloud](https://ollama.com/search?c=cloud):
+
+```bash
+ollama pull deepseek-v3.1:671b-cloud
+ollama pull qwen3-coder:480b-cloud
+```
 
 ---
 

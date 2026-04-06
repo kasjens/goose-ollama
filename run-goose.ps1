@@ -66,7 +66,7 @@ if (Test-Path $venvActivate) {
 
 # Set Goose env vars
 $env:GOOSE_PROVIDER = "ollama"
-$env:GOOSE_MODEL = "minimax-m2.7:cloud"
+$env:GOOSE_MODEL = "qwen3.5:cloud"
 
 # Launch Goose
 goose session --name minimax-ollama

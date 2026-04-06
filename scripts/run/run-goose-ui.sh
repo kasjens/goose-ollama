@@ -60,7 +60,7 @@ fi
 echo ""
 echo -e "${BLUE}🎯 Configuration:${NC}"
 echo "  • Provider: Ollama (Cloud Models)"
-echo "  • Default Model: minimax-m2.7:cloud"
+echo "  • Default Model: qwen3.5:cloud"
 echo "  • Skills: 32 total (18 Anthropic + 14 MiniMax)"
 echo "  • Web Search: Brave Search API"
 echo ""
@@ -73,7 +73,7 @@ fi
 
 # Set environment variables (desktop app reads these too)
 export GOOSE_PROVIDER=ollama
-export GOOSE_MODEL=minimax-m2.7:cloud
+export GOOSE_MODEL=qwen3.5:cloud
 
 echo -e "${GREEN}🚀 Launching Goose Desktop UI...${NC}"
 echo ""

@@ -94,16 +94,18 @@ else
     ok "Signed in to Ollama cloud"
 fi
 
-# ── 5. Pull default model ─────────────────────────────────────────
-step 5 "Ensuring default model is available..."
+# ── 5. Pull cloud models ─────────────────────────────────────────
+step 5 "Pulling cloud models..."
 
-if ollama list 2>/dev/null | grep -q "minimax-m2.7:cloud"; then
-    ok "minimax-m2.7:cloud already pulled"
-else
-    echo "  Pulling minimax-m2.7:cloud ..."
-    ollama pull minimax-m2.7:cloud
-    ok "Model pulled"
-fi
+for model in "qwen3.5:cloud" "gemma4:31b-cloud" "minimax-m2.7:cloud"; do
+    if ollama list 2>/dev/null | grep -q "$model"; then
+        ok "$model already pulled"
+    else
+        echo "  Pulling $model ..."
+        ollama pull "$model" 2>/dev/null
+        ok "$model pulled"
+    fi
+done
 
 # ── 6. Python virtual environment ─────────────────────────────────
 step 6 "Setting up Python environment..."

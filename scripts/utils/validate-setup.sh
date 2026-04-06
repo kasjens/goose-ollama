@@ -74,10 +74,11 @@ else
     check_fail "Ollama service not responding on port 11434"
 fi
 
-if ollama list 2>/dev/null | grep -q "minimax-m2.7:cloud"; then
-    check_pass "minimax-m2.7:cloud model available"
+CLOUD_COUNT=$(ollama list 2>/dev/null | grep -c ":cloud" || echo 0)
+if [ "$CLOUD_COUNT" -gt 0 ]; then
+    check_pass "$CLOUD_COUNT cloud model(s) available"
 else
-    check_fail "minimax-m2.7:cloud model not pulled"
+    check_fail "No cloud models pulled (run: ollama pull qwen3.5:cloud)"
 fi
 
 # ── 3. Python environment ────────────────────────────────────────

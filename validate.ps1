@@ -56,9 +56,10 @@ if ($ollamaUp) { Check-Pass "Ollama service running on port 11434" }
 else           { Check-Fail "Ollama service not responding" }
 
 $models = ollama list 2>&1 | Out-String
-if ($models -match "minimax-m2\.7:cloud") {
-    Check-Pass "minimax-m2.7:cloud model available"
-} else { Check-Fail "minimax-m2.7:cloud model not pulled" }
+$cloudCount = ($models -split "`n" | Where-Object { $_ -match ":cloud" }).Count
+if ($cloudCount -gt 0) {
+    Check-Pass "$cloudCount cloud model(s) available"
+} else { Check-Fail "No cloud models pulled (run: ollama pull qwen3.5:cloud)" }
 
 # -- Python Environment ------------------------------------------------------
 Section "Python Environment"
