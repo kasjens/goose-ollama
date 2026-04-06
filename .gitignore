@@ -30,8 +30,8 @@ Thumbs.db
 # Logs
 *.log
 
-# Generated files
-slides/output/
+# Generated files and examples
+slides/
 *.pptx
 
 # Python bytecode
