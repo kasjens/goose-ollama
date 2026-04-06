@@ -330,8 +330,8 @@ fi
 section_header "NODE.JS DEPENDENCIES"
 
 # Check package.json
-if [ -f "package.json" ]; then
-    check_pass "package.json exists"
+if [ -f "config/package.json" ]; then
+    check_pass "package.json exists in config/"
     
     # Check node_modules
     if [ -d "node_modules" ]; then
@@ -347,12 +347,12 @@ if [ -f "package.json" ]; then
         check_fail "Node modules not installed"
     fi
 else
-    check_warn "package.json missing (Node dependencies may not be managed)"
+    check_warn "config/package.json missing (Node dependencies may not be managed)"
 fi
 
-# Check slides directory
+# Check slides directory (now removed as it was just demo output)
 if [ -d "slides" ]; then
-    check_pass "Slides directory exists"
+    check_info "Slides directory exists (demo output - can be removed)"
     if [ -f "slides/package.json" ]; then
         cd slides
         if npm list pptxgenjs &>/dev/null; then

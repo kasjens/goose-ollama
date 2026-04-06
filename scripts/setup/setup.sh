@@ -27,7 +27,7 @@ fi
 # Install Python dependencies in virtual environment
 echo "Installing Python dependencies for skills..."
 source venv/bin/activate
-pip install -q -r requirements.txt
+pip install -q -r config/requirements.txt
 deactivate
 
 # Skills Integration (Auto-Discovery)
