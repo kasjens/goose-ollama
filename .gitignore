@@ -2,19 +2,19 @@
 venv/
 __pycache__/
 *.pyc
+*.pyo
 
-# Node modules
+# Node modules (created by install-all-dependencies)
 node_modules/
+package.json
 package-lock.json
 
 # Environment files (contain API keys)
 .env
 *.env
-
-# Brave Search MCP (contains API key)
 brave-search-mcp/.env
 
-# Config files with API keys
+# Config backups
 config.yaml.bak
 config.yaml.backup.*
 .goose/config.yaml.backup.*
@@ -30,18 +30,17 @@ Thumbs.db
 # Logs
 *.log
 
-# Generated files and examples
+# Generated output
 slides/
 *.pptx
+scripts/run/*.html
+scripts/run/*.py
+!scripts/run/*.sh
 
-# Python bytecode
-__pycache__/
-*.pyc
-*.pyo
-
-# SearxNG docker data (if using)
-searxng/
-searxng-redis/
+# Downloaded binaries
+*.zip
+*.tar.bz2
+*.deb
 
 # Skill repositories (cloned fresh during setup)
 anthropic-skills/
@@ -50,12 +49,6 @@ minimax-skills/
 # Claude Code
 .claude/
 
-# Downloaded binaries
-*.zip
-*.tar.bz2
-*.deb
-
-# Goose-generated output
-scripts/run/*.html
-scripts/run/*.py
-!scripts/run/*.sh
+# Docker data (if using)
+searxng/
+searxng-redis/

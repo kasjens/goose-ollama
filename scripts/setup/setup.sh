@@ -210,6 +210,17 @@ else
     fi
 fi
 
+# Create Goose config if it doesn't exist (use full template with all extensions)
+if [ ! -f "$HOME/.config/goose/config.yaml" ]; then
+    mkdir -p "$HOME/.config/goose"
+    if [ -f "$PROJECT_DIR/config/goose-config-template.yaml" ]; then
+        cp "$PROJECT_DIR/config/goose-config-template.yaml" "$HOME/.config/goose/config.yaml"
+    fi
+    ok "Goose config created"
+else
+    ok "Goose config already exists"
+fi
+
 # ── Done ──────────────────────────────────────────────────────────
 echo ""
 echo -e "${GREEN}Setup complete!${NC}"
