@@ -97,7 +97,7 @@ fi
 # ── 5. Pull cloud models ─────────────────────────────────────────
 step 5 "Pulling cloud models..."
 
-for model in "qwen3.5:cloud" "gemma4:31b-cloud" "minimax-m2.7:cloud"; do
+for model in "qwen3.5:cloud" "qwen3-coder:480b-cloud" "deepseek-v3.1:671b-cloud" "gemma4:31b-cloud" "minimax-m2.7:cloud"; do
     if ollama list 2>/dev/null | grep -q "$model"; then
         ok "$model already pulled"
     else

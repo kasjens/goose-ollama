@@ -175,27 +175,29 @@ Everything works the same as WSL2, except the Python venv is created in the proj
 
 ## Cloud Models
 
-Setup pulls 3 cloud models automatically. No GPU or large downloads needed - inference runs on Ollama's servers.
+Setup pulls 5 cloud models automatically. No GPU or large downloads needed - inference runs on Ollama's servers.
 
-| Model | Default | Vision | Context | Description |
-|-------|---------|--------|---------|-------------|
-| `qwen3.5:cloud` | Yes | Yes | 128K | Qwen 3.5 - fast, multimodal, strong coding |
-| `gemma4:31b-cloud` | | Yes | 256K | Google Gemma 4 31B - large context, multimodal |
-| `minimax-m2.7:cloud` | | No | 128K | MiniMax M2.7 - balanced text generation |
+| Model | Default | Vision | Best For |
+|-------|---------|--------|----------|
+| `qwen3.5:cloud` | Yes | Yes | General purpose, multimodal (images + text) |
+| `qwen3-coder:480b-cloud` | | No | Coding (#1 on SWE-bench, 480B params) |
+| `deepseek-v3.1:671b-cloud` | | No | Coding & reasoning (671B params) |
+| `gemma4:31b-cloud` | | Yes | Large context (256K), multimodal |
+| `minimax-m2.7:cloud` | | No | Balanced text generation |
 
 **Switch models** in the Goose Desktop UI via Settings, or edit the config file:
 
 ```yaml
 # ~/.config/goose/config.yaml (WSL2/Ubuntu)
 # %USERPROFILE%\.config\goose\config.yaml (Windows)
-GOOSE_MODEL: gemma4:31b-cloud
+GOOSE_MODEL: qwen3-coder:480b-cloud
 ```
 
 **Pull additional models** from [ollama.com/search?c=cloud](https://ollama.com/search?c=cloud):
 
 ```bash
-ollama pull deepseek-v3.1:671b-cloud
-ollama pull qwen3-coder:480b-cloud
+ollama pull llama4-maverick:cloud
+ollama pull phi-4:cloud
 ```
 
 ---

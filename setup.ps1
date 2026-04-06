@@ -132,9 +132,11 @@ Step 5 "Pulling cloud models..."
 $ErrorActionPreference = "Continue"
 $models = ollama list 2>&1 | Out-String
 $cloudModels = @(
-    @{ name = "qwen3.5:cloud";         desc = "Qwen 3.5 (multimodal, default)" }
-    @{ name = "gemma4:31b-cloud";       desc = "Gemma 4 31B (multimodal, 256K context)" }
-    @{ name = "minimax-m2.7:cloud";     desc = "MiniMax M2.7 (text only)" }
+    @{ name = "qwen3.5:cloud";            desc = "Qwen 3.5 - multimodal, default" }
+    @{ name = "qwen3-coder:480b-cloud";   desc = "Qwen3-Coder 480B - #1 coding model" }
+    @{ name = "deepseek-v3.1:671b-cloud"; desc = "DeepSeek V3.1 671B - strong coding/reasoning" }
+    @{ name = "gemma4:31b-cloud";         desc = "Gemma 4 31B - multimodal, 256K context" }
+    @{ name = "minimax-m2.7:cloud";       desc = "MiniMax M2.7 - balanced text generation" }
 )
 foreach ($m in $cloudModels) {
     if ($models -match [regex]::Escape($m.name)) {
