@@ -1,26 +1,21 @@
 #!/bin/bash
 
-# Goose Runner Script - Force User-Local Installation  
+# Goose Runner Script - Force User-Local Installation
 # Uses the user-local Goose AI installation specifically
 
-# Ensure we're in the project directory
-cd "$(dirname "$0")"
+# Ensure we're in the project root (where .agents/skills/ lives)
+cd "$(dirname "$0")/../.."
 
-USER_GOOSE="/home/kasjens/.local/bin/goose"
+USER_GOOSE="$HOME/.local/bin/goose"
 
 # Check if user-local Goose exists
 if [[ ! -x "$USER_GOOSE" ]]; then
-    echo "❌ Error: User-local Goose AI installation not found at $USER_GOOSE"
-    echo "To install:"
-    echo "  pip install goose-ai"
-    echo ""
-    echo "Available installations:"
-    which -a goose 2>/dev/null || echo "No Goose installations found in PATH"
+    echo "Error: User-local Goose AI not found at $USER_GOOSE"
+    echo "Run ./setup.sh to install."
     exit 1
 fi
 
-echo "🔧 Using User-Local Goose AI Installation"
-echo "Path: $USER_GOOSE"
+echo "Using User-Local Goose AI: $USER_GOOSE"
 USER_VERSION=$("$USER_GOOSE" --version 2>/dev/null | tr -d ' ')
 echo "Version: $USER_VERSION"
 echo ""
@@ -39,11 +34,14 @@ if ! ollama list | grep -q "minimax-m2.7:cloud"; then
     exit 1
 fi
 
-echo "Starting User-Local Goose AI with Ollama MiniMax..."
-echo "Model: minimax-m2.7:cloud"
-echo "Skills available in: minimax-skills/skills/"
-echo "Configuration: ~/.config/goose/config.yaml"
-echo ""
+# Activate Python virtual environment
+VENV_DIR="$HOME/.local/share/goose-ollama-minimax/venv"
+if [ -f "$VENV_DIR/bin/activate" ]; then
+    source "$VENV_DIR/bin/activate"
+fi
+
+export GOOSE_PROVIDER=ollama
+export GOOSE_MODEL=minimax-m2.7:cloud
 
 # Run Goose session with user-local installation
 "$USER_GOOSE" session --name minimax-ollama-local

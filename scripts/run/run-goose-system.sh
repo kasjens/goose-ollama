@@ -3,8 +3,8 @@
 # Goose Runner Script - Force System-Wide Installation
 # Uses the system-wide Goose installation specifically
 
-# Ensure we're in the project directory
-cd "$(dirname "$0")"
+# Ensure we're in the project root (where .agents/skills/ lives)
+cd "$(dirname "$0")/../.."
 
 SYSTEM_GOOSE="/usr/bin/goose"
 
@@ -54,9 +54,16 @@ if ! ollama list | grep -q "minimax-m2.7:cloud"; then
 fi
 
 echo "Starting System-Wide Goose..."
-echo "Model: minimax-m2.7:cloud (if supported)"
-echo "Skills available in: minimax-skills/skills/ (if supported)"
 echo ""
+
+# Activate Python virtual environment
+VENV_DIR="$HOME/.local/share/goose-ollama-minimax/venv"
+if [ -f "$VENV_DIR/bin/activate" ]; then
+    source "$VENV_DIR/bin/activate"
+fi
+
+export GOOSE_PROVIDER=ollama
+export GOOSE_MODEL=minimax-m2.7:cloud
 
 # Run Goose session with system installation
 "$SYSTEM_GOOSE" session --name minimax-ollama-system 2>/dev/null || {

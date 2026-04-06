@@ -1,0 +1,26 @@
+# Core dependencies for Goose + MiniMax Skills (lightweight)
+# For full ML/AI packages, run: scripts/setup/install-all-dependencies.sh
+
+# Data Processing
+pandas
+numpy
+pillow
+requests
+matplotlib
+
+# Document Processing
+pypdf
+python-docx
+openpyxl
+python-pptx
+markitdown[pptx]
+
+# Utilities
+python-dotenv
+pyyaml
+jsonschema
+click
+rich
+beautifulsoup4
+lxml
+jinja2

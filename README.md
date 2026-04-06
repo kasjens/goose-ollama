@@ -79,62 +79,29 @@ All skills are **automatically detected** by Goose based on your requests - no m
 ### Web Search
 - **Brave Search**: Integrated web search capability (2000 queries/month free)
 
-## Quick Start
+## Quick Start (Fresh WSL2 Ubuntu)
 
-### New Installation
-1. **Install Goose AI** (Ubuntu 25.10+ with PEP 668)
+1. **Run setup** (handles everything: Ollama, Goose, Python, skills)
    ```bash
-   scripts/setup/install-goose-ai.sh  # Handles modern Python environments
+   ./setup.sh
    ```
 
-2. **Complete Setup** (Installs everything)
+2. **Optional extras**
    ```bash
-   scripts/setup/install-all-dependencies.sh  # Full installation
+   scripts/setup/install-all-dependencies.sh  # Add PyTorch, Node.js, etc.
+   scripts/setup/setup-brave-search.sh        # Web search (free API key)
+   scripts/setup/install-goose-ui.sh          # Desktop UI
    ```
 
-3. **Configure Web Search** (Optional)
+3. **Run Goose**
    ```bash
-   scripts/setup/setup-brave-search.sh  # Setup Brave Search API
+   ./run-goose.sh                # CLI (recommended)
+   scripts/run/run-goose-ui.sh   # Desktop UI
    ```
 
-4. **Install Desktop UI** (Optional)
+4. **Validate**
    ```bash
-   scripts/setup/install-goose-ui.sh  # Install Goose Desktop
-   ```
-
-5. **Validate Setup**
-   ```bash
-   ./validate.sh                 # Comprehensive validation (symlink)
-   ```
-
-### Existing Installation (If Goose AI already installed)
-1. **Basic Setup**
-   ```bash
-   ./setup.sh                    # Quick setup (symlink)
-   ```
-
-2. **Configure Latest Cloud Models** (New!)
-   ```bash
-   scripts/setup/configure-cloud-models.sh  # Setup 2025 cloud models
-   ```
-
-3. **Run Goose with Cloud Models**
-   ```bash
-   # Command Line Interface
-   ./run-goose.sh               # Auto-detect and run (symlink)
-   scripts/run/run-goose-local.sh   # Force user-local Goose AI  
-   scripts/run/run-goose-system.sh  # Force system-wide installation
-   scripts/run/switch-model.sh      # Interactive model switcher
-   
-   # Desktop UI (if installed)
-   scripts/run/run-goose-ui.sh  # Launch Goose Desktop application
-   ```
-
-4. **Check Skills Status**
-   ```bash
-   python3 scripts/utils/integrate-skills.py list  # List all 31 skills
-   python3 scripts/utils/test-enhanced-skills.py   # Test Python packages
-   ./validate.sh                                   # Complete validation
+   ./validate.sh
    ```
 
 ## Configuration
@@ -161,9 +128,9 @@ enabled_skills:
 This setup supports both user-local and system-wide Goose installations:
 
 **User-Local Goose AI** (Recommended):
-- Location: `/home/kasjens/.local/bin/goose`
+- Location: `~/.local/bin/goose`
 - Type: Goose AI CLI (supports Ollama)
-- Use: `./run-goose-local.sh`
+- Use: `./run-goose.sh`
 
 **System-Wide Installation**:
 - Location: `/usr/bin/goose`
@@ -188,82 +155,22 @@ ollama pull minimax-m2.7:cloud
 ### Port Conflicts
 If port 11434 is in use, update the base_url in `.goose/config.yaml`
 
-## 🚀 Advanced Setup & Optimization
-
-For production use and maximum performance:
-
-1. **Validate Complete Setup**
-   ```bash
-   ./validate-setup.sh  # Comprehensive validation
-   ```
-
-2. **Apply Performance Optimizations**
-   ```bash
-   ./optimize-setup.sh  # GPU, memory, and performance tuning
-   ```
-
-3. **Monitor System Health**
-   ```bash
-   ./health-check.sh           # Quick health check
-   ./monitor-performance.sh    # Real-time performance monitoring
-   ```
-
-## 📖 Documentation
-
-- **[BEST-PRACTICES.md](BEST-PRACTICES.md)** - Enterprise-grade setup guide
-- **[DEPENDENCIES.md](DEPENDENCIES.md)** - Complete dependency documentation  
-- **[WEB-SEARCH-GUIDE.md](WEB-SEARCH-GUIDE.md)** - Web search integration
-- **[COMPLETE-SKILLS-GUIDE.md](COMPLETE-SKILLS-GUIDE.md)** - All skills reference
-
 ## Usage Examples
 
-Your enhanced Goose can now handle:
-- **Web Search**: "Search for latest React best practices"
-- **Document Processing**: "Create a PowerPoint about AI trends"
-- **Frontend Development**: "Build a landing page with animations"
-- **API Integration**: "Use the Claude API to create a chatbot"
-- **Computer Vision**: "Analyze this image and detect objects"
-- **Deep Learning**: "Train a PyTorch model for image classification"
-- **Web Apps**: "Create a Streamlit dashboard for this data"
-- **Audio Processing**: "Analyze this audio file and extract features"
-- **Video Editing**: "Extract key frames from this video"
-- **Mobile Development**: "Help me create a Flutter app"
+Just ask Goose naturally:
+- "Create a PowerPoint about AI trends"
+- "Build a landing page with animations"
+- "Search for latest React best practices"
+- "Help me create a Flutter app"
+- "Generate a Word document"
+- "Analyze this image"
 
-**30 Python packages** installed including PyTorch, OpenCV, Streamlit, Gradio, and more!
+## Key Paths
 
-## 🔧 Maintenance Commands
-
-```bash
-# Quick Access (via symlinks)
-./setup.sh                    # Quick setup
-./run-goose.sh                # Auto-detect and run
-./validate.sh                 # Full system validation
-
-# All Scripts
-scripts/setup/                # Installation & configuration scripts
-scripts/run/                  # Execution scripts
-scripts/utils/                # Utilities & maintenance
-
-# Skills Management  
-python3 scripts/utils/integrate-skills.py list
-python3 scripts/utils/test-enhanced-skills.py
-
-# Optimization
-scripts/utils/optimize-setup.sh  # Apply performance optimizations
-```
-
-## System Architecture
-
-```
-🪿 Goose AI Agent
-├── 🧠 Local LLM (Ollama + MiniMax)
-├── 🔍 Web Search (Brave Search API)
-├── 📚 Skills Engine
-│   ├── 18 Anthropic Skills (Claude-native)
-│   └── 14 MiniMax Skills (Multimodal AI)
-├── 🔧 MCP Extensions
-├── 🐍 Python Environment (10+ packages)
-└── 📦 Node.js Tools (PowerPoint, etc.)
-```
-
-This setup provides a complete, enterprise-ready local AI development environment.
+| What | Where |
+|------|-------|
+| Python venv | `~/.local/share/goose-ollama-minimax/venv` |
+| Goose CLI | `~/.local/bin/goose` |
+| Goose config | `~/.config/goose/config.yaml` |
+| Skills | `.agents/skills/` (31 skills) |
+| Scripts | `scripts/setup/`, `scripts/run/`, `scripts/utils/` |

@@ -69,14 +69,17 @@ echo ""
 echo "🐍 Setting up Python Virtual Environment..."
 echo "-----------------------------------------"
 
-# Create venv if it doesn't exist
-if [ ! -d "venv" ]; then
-    echo "Creating virtual environment..."
-    python3 -m venv venv
+# Use the same venv location as setup.sh (native Linux filesystem — NTFS mounts break venvs)
+VENV_DIR="$HOME/.local/share/goose-ollama-minimax/venv"
+
+if [ ! -f "$VENV_DIR/bin/activate" ]; then
+    echo "Creating virtual environment at $VENV_DIR..."
+    mkdir -p "$(dirname "$VENV_DIR")"
+    python3 -m venv "$VENV_DIR"
 fi
 
 # Activate virtual environment
-source venv/bin/activate
+source "$VENV_DIR/bin/activate"
 
 echo ""
 
@@ -156,11 +159,18 @@ echo ""
 echo "📦 Installing Node.js Dependencies..."
 echo "------------------------------------"
 
-# Check if Node.js is installed
+# Install Node.js if missing
 if ! command_exists node; then
-    echo "⚠️  Node.js not found. Please install Node.js first."
-    echo "   Visit: https://nodejs.org/"
-else
+    echo "Node.js not found — installing via NodeSource..."
+    if [ "$OS" = "linux" ]; then
+        curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+        sudo apt-get install -y nodejs
+    elif [ "$OS" = "macos" ]; then
+        brew install node
+    fi
+fi
+
+if command_exists node; then
     echo "Node.js version: $(node --version)"
     
     # Install global packages for frontend development
@@ -202,36 +212,36 @@ if command -v goose &> /dev/null; then
     echo "✅ Goose AI already installed: $EXISTING_VERSION"
 else
     echo "Installing Goose AI..."
-    
-    # Check for externally managed environment (Ubuntu 24.04+)
-    if python3 -m pip install --help | grep -q "externally-managed-environment"; then
-        echo "Detected externally managed Python environment"
-        
-        # Use official Goose installer
-        echo "Using official Goose installer..."
-        curl -fsSL https://github.com/block/goose/releases/latest/download/download_cli.sh | bash
-        
-        # Ensure .local/bin directory is in PATH
-        if [ ! -d "$HOME/.local/bin" ] || [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
-            echo "Adding ~/.local/bin to PATH..."
-            echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
-            export PATH="$HOME/.local/bin:$PATH"
-        fi
-        
-    else
-        # Older system - use official installer too
-        echo "Using official Goose installer..."
-        curl -fsSL https://github.com/block/goose/releases/latest/download/download_cli.sh | bash
+
+    # Download Linux binary directly (the official installer misdetects WSL2 on /mnt/c as Windows)
+    mkdir -p "$HOME/.local/bin"
+    GOOSE_TMP="/tmp/goose-install-$$"
+    mkdir -p "$GOOSE_TMP"
+    echo "Downloading Linux binary..."
+    curl -fSL "https://github.com/block/goose/releases/latest/download/goose-x86_64-unknown-linux-gnu.tar.bz2" \
+        -o "$GOOSE_TMP/goose.tar.bz2"
+    cd "$GOOSE_TMP"
+    tar -xjf goose.tar.bz2
+    GOOSE_BIN=$(find "$GOOSE_TMP" -name "goose" -type f ! -name "*.tar.*" | head -1)
+    if [ -n "$GOOSE_BIN" ]; then
+        cp "$GOOSE_BIN" "$HOME/.local/bin/goose"
+        chmod +x "$HOME/.local/bin/goose"
     fi
-    
+    cd - > /dev/null
+    rm -rf "$GOOSE_TMP"
+
+    # Ensure PATH includes ~/.local/bin
+    if ! grep -q 'HOME/.local/bin' ~/.bashrc 2>/dev/null; then
+        echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+    fi
+    export PATH="$HOME/.local/bin:$PATH"
+
     # Verify installation
     if command -v goose &> /dev/null; then
         GOOSE_VERSION=$(goose --version 2>/dev/null | tr -d ' ' || echo "unknown")
         echo "✅ Goose AI installed successfully: $GOOSE_VERSION"
     else
-        echo "❌ Goose AI installation may have failed"
-        echo "Try manually: ./install-goose-ai.sh"
-        echo "Or direct installer: curl -fsSL https://github.com/block/goose/releases/latest/download/download_cli.sh | bash"
+        echo "❌ Goose AI installation failed"
     fi
 fi
 
@@ -362,10 +372,10 @@ echo "✅ Dependency Installation Complete!"
 echo "============================================"
 echo ""
 echo "🚀 **Next steps:**"
-echo "1. Configure cloud models: ./configure-cloud-models.sh"
-echo "2. Set up web search (optional): ./setup-brave-search.sh"
-echo "3. Install Desktop UI (optional): ./install-goose-ui.sh"
-echo "4. Validate setup: ./validate-setup.sh"
+echo "1. Configure cloud models: scripts/setup/configure-cloud-models.sh"
+echo "2. Set up web search (optional): scripts/setup/setup-brave-search.sh"
+echo "3. Install Desktop UI (optional): scripts/setup/install-goose-ui.sh"
+echo "4. Validate setup: ./validate.sh"
 echo "5. Start Goose: ./run-goose.sh"
 echo ""
 echo "✨ **You now have 31 skills ready to use automatically!**"

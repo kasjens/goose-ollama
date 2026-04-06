@@ -1,5 +1,7 @@
 #!/bin/bash
 
+PROJECT_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
+
 echo "============================================"
 echo "Brave Search Setup for Goose AI"
 echo "============================================"
@@ -25,7 +27,7 @@ fi
 
 # Store API key in .env file for the MCP server
 echo "Creating .env file for Brave Search MCP..."
-cat > /home/kasjens/projects/goose-ollama-minimax/brave-search-mcp/.env << EOF
+cat > $PROJECT_DIR/brave-search-mcp/.env << EOF
 BRAVE_API_KEY=$BRAVE_API_KEY
 EOF
 
@@ -128,7 +130,7 @@ if [ $TEST_RESULT -eq 0 ]; then
     echo "  • News search: 'Find news about...'"
     echo ""
     echo "To use Brave Search:"
-    echo "1. Restart Goose: cd /home/kasjens/projects/goose-ollama-minimax && ./run-goose.sh"
+    echo "1. Restart Goose: cd $PROJECT_DIR && ./run-goose.sh"
     echo "2. Ask Goose to search the web"
     echo ""
     echo "Examples:"
@@ -150,7 +152,7 @@ fi
 
 echo ""
 echo "Your API key has been stored in:"
-echo "  • /home/kasjens/projects/goose-ollama-minimax/brave-search-mcp/.env"
+echo "  • $PROJECT_DIR/brave-search-mcp/.env"
 echo "  • ~/.config/goose/config.yaml"
 echo ""
 echo "Keep these files secure and don't commit them to git."

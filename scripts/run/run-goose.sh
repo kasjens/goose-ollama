@@ -3,12 +3,12 @@
 # Goose Runner Script with Ollama MiniMax
 # Supports both user-local and system-wide Goose installations
 
-# Ensure we're in the project directory
-cd "$(dirname "$0")"
+# Ensure we're in the project root (where .agents/skills/ lives)
+cd "$(dirname "$0")/../.."
 
 # Function to detect and use appropriate Goose installation
 detect_goose() {
-    local USER_GOOSE="/home/kasjens/.local/bin/goose"
+    local USER_GOOSE="$HOME/.local/bin/goose"
     local SYSTEM_GOOSE="/usr/bin/goose"
     
     if [[ -x "$USER_GOOSE" ]]; then
@@ -78,8 +78,14 @@ echo "Skills: 32 total (18 Anthropic + 14 MiniMax)"
 echo "To switch models: ./switch-model.sh"
 echo ""
 
+# Activate Python virtual environment so skills can access installed packages
+VENV_DIR="$HOME/.local/share/goose-ollama-minimax/venv"
+if [ -f "$VENV_DIR/bin/activate" ]; then
+    source "$VENV_DIR/bin/activate"
+fi
+
 # Set Goose environment variables
-export GOOSE_PROVIDER=ollama  
+export GOOSE_PROVIDER=ollama
 export GOOSE_MODEL=minimax-m2.7:cloud
 
 # Run Goose session with detected installation

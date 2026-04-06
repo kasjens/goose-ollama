@@ -3,8 +3,8 @@
 # Goose Desktop UI Runner Script
 # Launches the Goose Desktop application with proper configuration
 
-# Ensure we're in the project directory
-cd "$(dirname "$0")"
+# Ensure we're in the project root (where .agents/skills/ lives)
+cd "$(dirname "$0")/../.."
 
 echo "=================================================="
 echo "🖥️  GOOSE DESKTOP UI LAUNCHER"
@@ -64,6 +64,12 @@ echo "  • Default Model: minimax-m2.7:cloud"
 echo "  • Skills: 32 total (18 Anthropic + 14 MiniMax)"
 echo "  • Web Search: Brave Search API"
 echo ""
+
+# Activate Python virtual environment so skills can access installed packages
+VENV_DIR="$HOME/.local/share/goose-ollama-minimax/venv"
+if [ -f "$VENV_DIR/bin/activate" ]; then
+    source "$VENV_DIR/bin/activate"
+fi
 
 # Set environment variables (desktop app reads these too)
 export GOOSE_PROVIDER=ollama
