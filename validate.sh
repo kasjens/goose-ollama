@@ -1,1 +1,1 @@
-scripts/utils/validate-setup.sh
+scripts/validate-setup.sh

@@ -7,7 +7,7 @@ echo "=================================="
 models=($(ollama list | grep ":cloud" | awk '{print $1}' | sort))
 
 if [ ${#models[@]} -eq 0 ]; then
-    echo "No cloud models found. Run ./configure-cloud-models.sh first."
+    echo "No cloud models found. Run: ollama signin && ollama pull qwen3.5:cloud"
     exit 1
 fi
 

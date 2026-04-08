@@ -9,7 +9,7 @@ $ErrorActionPreference = "Stop"
 $PROJECT_DIR = Split-Path -Parent $MyInvocation.MyCommand.Path
 Set-Location $PROJECT_DIR
 
-function Step  { param($n,$msg) Write-Host "`n[$n/8] $msg" -ForegroundColor Blue }
+function Step  { param($n,$msg) Write-Host "`n[$n/9] $msg" -ForegroundColor Blue }
 function Ok    { param($msg)    Write-Host "  OK $msg" -ForegroundColor Green }
 function Warn  { param($msg)    Write-Host "  !! $msg" -ForegroundColor Yellow }
 function Fail  { param($msg)    Write-Host "  FAIL $msg" -ForegroundColor Red; exit 1 }
@@ -126,27 +126,92 @@ if ($models -match ":cloud") {
     }
 }
 
-# -- 5. Pull cloud models ----------------------------------------------------
-Step 5 "Pulling cloud models..."
+# -- 5. Fetch and pull cloud models ------------------------------------------
+Step 5 "Fetching latest cloud models from ollama.com..."
 
 $ErrorActionPreference = "Continue"
-$models = ollama list 2>&1 | Out-String
-$cloudModels = @(
-    @{ name = "qwen3.5:cloud";            desc = "Qwen 3.5 - multimodal, default" }
-    @{ name = "qwen3-coder:480b-cloud";   desc = "Qwen3-Coder 480B - #1 coding model" }
-    @{ name = "deepseek-v3.1:671b-cloud"; desc = "DeepSeek V3.1 671B - strong coding/reasoning" }
-    @{ name = "gemma4:31b-cloud";         desc = "Gemma 4 31B - multimodal, 256K context" }
-    @{ name = "minimax-m2.7:cloud";       desc = "MiniMax M2.7 - balanced text generation" }
-)
-foreach ($m in $cloudModels) {
-    if ($models -match [regex]::Escape($m.name)) {
-        Ok "$($m.name) already pulled"
-    } else {
-        Write-Host "  Pulling $($m.name) ($($m.desc))..."
-        ollama pull $m.name 2>&1 | Out-Null
-        Ok "$($m.name) pulled"
+
+# Discover all available cloud models dynamically
+Write-Host "  Querying ollama.com for cloud models..."
+$cloudTags = @()
+try {
+    $html = Invoke-WebRequest -Uri "https://ollama.com/search?c=cloud" -UseBasicParsing -TimeoutSec 15
+    $modelNames = [regex]::Matches($html.Content, 'href="/library/([^"]*)"') |
+        ForEach-Object { $_.Groups[1].Value } |
+        Where-Object { $_ -notmatch '/' } |
+        Sort-Object -Unique
+
+    foreach ($modelName in $modelNames) {
+        try {
+            $tagsHtml = Invoke-WebRequest -Uri "https://ollama.com/library/$modelName/tags" -UseBasicParsing -TimeoutSec 10
+            $tags = [regex]::Matches($tagsHtml.Content, "href=""/library/${modelName}:([^""]*cloud[^""]*)""") |
+                ForEach-Object { "${modelName}:$($_.Groups[1].Value)" } |
+                Sort-Object -Unique
+            foreach ($tag in $tags) {
+                $cloudTags += $tag
+            }
+        } catch {}
+    }
+} catch {}
+
+if ($cloudTags.Count -eq 0) {
+    Warn "Could not fetch model list from ollama.com - falling back to defaults"
+    $cloudTags = @("qwen3.5:cloud", "qwen3-coder:480b-cloud", "deepseek-v3.1:671b-cloud", "gemma4:31b-cloud", "minimax-m2.7:cloud")
+} else {
+    Ok "Found $($cloudTags.Count) cloud models on ollama.com"
+}
+
+# Get currently installed cloud models
+$installedRaw = ollama list 2>&1 | Out-String
+$installedModels = @()
+foreach ($line in ($installedRaw -split "`n")) {
+    if ($line -match ":.*cloud") {
+        $name = ($line -split "\s+")[0]
+        if ($name) { $installedModels += $name }
     }
 }
+
+Write-Host ""
+Write-Host "  Available cloud models:"
+foreach ($tag in $cloudTags) {
+    if ($installedModels -contains $tag) {
+        Write-Host "    [installed] $tag" -ForegroundColor Green
+    } else {
+        Write-Host "    [new]       $tag" -ForegroundColor Yellow
+    }
+}
+
+Write-Host ""
+Write-Host "  1) Pull all cloud models ($($cloudTags.Count) total)"
+Write-Host "  2) Pull only new/missing models"
+Write-Host "  3) Skip (keep current models)"
+$modelChoice = Read-Host "  Choice [1-3, default=1]"
+if ([string]::IsNullOrWhiteSpace($modelChoice)) { $modelChoice = "1" }
+
+if ($modelChoice -ne "3") {
+    foreach ($tag in $cloudTags) {
+        if ($installedModels -contains $tag) {
+            Ok "$tag already pulled"
+        } else {
+            Write-Host "  Pulling $tag ..."
+            ollama pull $tag 2>&1 | Out-Null
+            Ok "$tag pulled"
+        }
+    }
+}
+
+# Remove models no longer available on ollama.com
+foreach ($installed in $installedModels) {
+    if ($cloudTags -notcontains $installed) {
+        Write-Host "  [obsolete] $installed is no longer on ollama.com" -ForegroundColor Red
+        $rmReply = Read-Host "  Remove $installed? [Y/n]"
+        if ($rmReply -ne 'n' -and $rmReply -ne 'N') {
+            ollama rm $installed 2>&1 | Out-Null
+            Ok "Removed $installed"
+        }
+    }
+}
+
 $ErrorActionPreference = "Stop"
 
 # -- 6. Python virtual environment -------------------------------------------
@@ -284,6 +349,27 @@ GOOSE_MODEL: qwen3.5:cloud
     Ok "Goose config created at $configPath"
 } else {
     Ok "Goose config already exists"
+}
+
+# -- 9. Optional extras -------------------------------------------------------
+Step 9 "Optional extras..."
+
+Write-Host ""
+$depsReply = Read-Host "  Install full ML/AI dependencies (PyTorch, OpenCV, Node.js, FFmpeg)? [y/N]"
+if ($depsReply -eq 'y' -or $depsReply -eq 'Y') {
+    Write-Host "  Running install-all-dependencies.ps1..."
+    & "$PROJECT_DIR\scripts\install-all-dependencies.ps1"
+    Ok "Full dependencies installed"
+} else {
+    Ok "Skipped (run scripts\install-all-dependencies.ps1 later if needed)"
+}
+
+Write-Host ""
+$braveReply = Read-Host "  Set up Brave Search web integration (free API key)? [y/N]"
+if ($braveReply -eq 'y' -or $braveReply -eq 'Y') {
+    & "$PROJECT_DIR\scripts\setup-brave-search.ps1"
+} else {
+    Ok "Skipped (run scripts\setup-brave-search.ps1 later if needed)"
 }
 
 # -- Done ---------------------------------------------------------------------

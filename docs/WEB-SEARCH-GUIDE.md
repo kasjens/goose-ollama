@@ -6,7 +6,8 @@ Goose AI supports web search through MCP (Model Context Protocol) servers. This 
 ## Quick Setup
 Run the automated setup script:
 ```bash
-./setup-websearch.sh
+scripts/setup-brave-search.sh    # Linux / WSL2
+scripts\setup-brave-search.ps1   # Windows
 ```
 
 ## Available Options

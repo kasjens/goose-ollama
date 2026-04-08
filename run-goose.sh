@@ -1,1 +1,1 @@
-scripts/run/run-goose.sh
+scripts/run-goose.sh

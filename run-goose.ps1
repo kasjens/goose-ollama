@@ -50,7 +50,7 @@ if (-not $ollamaUp) {
 $models = ollama list 2>&1 | Out-String
 $cloudCount = ($models -split "`n" | Where-Object { $_ -match ":cloud" }).Count
 if ($cloudCount -eq 0) {
-    Write-Host "Warning: No cloud models found. Run scripts/setup/configure-cloud-models.sh" -ForegroundColor Yellow
+    Write-Host "Warning: No cloud models found. Run: ollama signin; ollama pull qwen3.5:cloud" -ForegroundColor Yellow
 }
 
 Write-Host "Starting Goose with Ollama Cloud Models..."

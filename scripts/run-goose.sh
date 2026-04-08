@@ -41,7 +41,7 @@ fi
 CLOUD_MODELS=$(ollama list | grep ":cloud" | wc -l)
 if [ $CLOUD_MODELS -eq 0 ]; then
     echo "⚠️  No cloud models found!"
-    echo "Run ./configure-cloud-models.sh to set up latest 2025 models"
+    echo "Run: ollama signin && ollama pull qwen3.5:cloud"
     echo ""
     read -p "Continue anyway? [y/N]: " -n 1 -r
     echo
@@ -53,7 +53,7 @@ elif ! ollama list | grep -q "minimax-m2.7:cloud"; then
     echo "Available cloud models:"
     ollama list | grep ":cloud" | awk '{print "  - " $1}'
     echo ""
-    echo "Run ./configure-cloud-models.sh to ensure all models are available"
+    echo "Run: ollama pull minimax-m2.7:cloud"
 fi
 
 # Detect and configure Goose installation
@@ -74,7 +74,7 @@ if [ $TOTAL_CLOUD -gt 5 ]; then
 fi
 
 echo ""
-echo "Skills: 32 total (18 Anthropic + 14 MiniMax)"
+echo "Skills: 31 auto-discovered"
 echo "To switch models: ./switch-model.sh"
 echo ""
 

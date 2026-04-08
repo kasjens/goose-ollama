@@ -204,6 +204,6 @@ Write-Host "Full Dependency Installation Complete!" -ForegroundColor Green
 Write-Host "============================================"
 Write-Host ""
 Write-Host "Next steps:"
-Write-Host "  1. Set up web search: scripts\setup\setup-brave-search.ps1"
+Write-Host "  1. Set up web search: scripts\setup-brave-search.ps1"
 Write-Host "  2. Validate: .\validate.ps1"
 Write-Host "  3. Run Goose: .\run-goose.ps1"

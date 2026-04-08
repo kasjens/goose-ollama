@@ -55,7 +55,7 @@ else
 fi
 
 # Verify package size
-FILE_SIZE=$(stat -f%z "$DEB_FILE" 2>/dev/null || stat -c%s "$DEB_FILE" 2>/dev/null || echo "0")
+FILE_SIZE=$(wc -c < "$DEB_FILE" 2>/dev/null || echo "0")
 if [ "$FILE_SIZE" -lt 100000000 ]; then  # Less than 100MB indicates incomplete download
     echo -e "${YELLOW}⚠️  Package seems incomplete, re-downloading...${NC}"
     rm -f "$DEB_FILE"
@@ -151,5 +151,5 @@ echo -e "${YELLOW}📝 Note:${NC}"
 echo "• Desktop UI and CLI are fully compatible"
 echo "• You can switch between them seamlessly"
 echo "• Both use your Ollama cloud models"
-echo "• All 32 skills available in both interfaces"
+echo "• All 31 skills available in both interfaces"
 echo ""

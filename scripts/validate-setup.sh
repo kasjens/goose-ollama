@@ -159,7 +159,7 @@ if [ -d "brave-search-mcp" ] && [ -f "brave-search-mcp/package.json" ]; then
     if [ -f "brave-search-mcp/.env" ] && grep -q "BRAVE_API_KEY" brave-search-mcp/.env 2>/dev/null; then
         check_pass "Brave Search API key configured"
     else
-        check_info "Brave Search API key not configured (run scripts/setup/setup-brave-search.sh)"
+        check_info "Brave Search API key not configured (run scripts/setup-brave-search.sh)"
     fi
 else
     check_info "Brave Search MCP not set up (optional)"

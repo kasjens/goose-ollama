@@ -27,8 +27,39 @@ $envPath = Join-Path $PROJECT_DIR "brave-search-mcp\.env"
 "BRAVE_API_KEY=$apiKey" | Set-Content $envPath
 Write-Host "  OK Saved to $envPath" -ForegroundColor Green
 
-# Note: MCP extensions must be added through the Goose Desktop UI settings.
-# The config file approach does not work for stdio/MCP extensions.
+# Add Brave Search extension to Goose CLI config
+$configPath = Join-Path $env:USERPROFILE ".config\goose\config.yaml"
+if (Test-Path $configPath) {
+    $configContent = Get-Content $configPath -Raw
+    if ($configContent -match "brave-search:") {
+        Write-Host "  OK Brave Search already in Goose config" -ForegroundColor Green
+    } else {
+        # Insert before GOOSE_TELEMETRY_ENABLED (or append to extensions)
+        $extension = @"
+
+  brave-search:
+    name: brave-search
+    cmd: npx
+    args:
+      - -y
+      - "@brave/brave-search-mcp-server"
+    enabled: true
+    envs:
+      BRAVE_API_KEY: "$apiKey"
+    type: stdio
+    timeout: 300
+"@
+        if ($configContent -match "GOOSE_TELEMETRY_ENABLED:") {
+            $configContent = $configContent -replace "(GOOSE_TELEMETRY_ENABLED:)", "$extension`n`$1"
+        } else {
+            $configContent += $extension
+        }
+        Set-Content $configPath $configContent -NoNewline
+        Write-Host "  OK Added Brave Search to Goose config" -ForegroundColor Green
+    }
+} else {
+    Write-Host "  INFO Goose config not found at $configPath - run setup.ps1 first" -ForegroundColor Yellow
+}
 
 # Test API
 Write-Host ""

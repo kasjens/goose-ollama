@@ -42,7 +42,7 @@ fi
 CLOUD_MODELS=$(ollama list | grep ":cloud" | wc -l)
 if [ $CLOUD_MODELS -eq 0 ]; then
     echo -e "${YELLOW}⚠️  No cloud models found!${NC}"
-    echo "Run ./configure-cloud-models.sh to set up latest 2025 models"
+    echo "Run: ollama signin && ollama pull qwen3.5:cloud"
     echo ""
 else
     echo -e "${GREEN}✅ Cloud models available: $CLOUD_MODELS models${NC}"
@@ -61,7 +61,7 @@ echo ""
 echo -e "${BLUE}🎯 Configuration:${NC}"
 echo "  • Provider: Ollama (Cloud Models)"
 echo "  • Default Model: qwen3.5:cloud"
-echo "  • Skills: 32 total (18 Anthropic + 14 MiniMax)"
+echo "  • Skills: 31 auto-discovered"
 echo "  • Web Search: Brave Search API"
 echo ""
 
@@ -96,7 +96,7 @@ echo "Goose Desktop UI launched (PID: $GOOSE_PID)"
 echo ""
 echo -e "${BLUE}💡 Tips:${NC}"
 echo "• Configure providers in Settings > Configure Providers"
-echo "• Access all 32 skills through the chat interface"
+echo "• Access all 31 skills through the chat interface"
 echo "• Use web search: 'Search the web for...'"
 echo "• Switch models in Settings > Models"
 echo "• Sessions are shared between CLI and Desktop UI"

@@ -331,9 +331,7 @@ echo "✨ Verifying Installation..."
 echo "---------------------------"
 
 # Run the test script if available
-if [ -f "test_skills.py" ]; then
-    python test_skills.py
-fi
+echo "(skills are auto-discovered — no test needed)"
 
 echo ""
 
@@ -372,9 +370,8 @@ echo "✅ Dependency Installation Complete!"
 echo "============================================"
 echo ""
 echo "🚀 **Next steps:**"
-echo "1. Configure cloud models: scripts/setup/configure-cloud-models.sh"
-echo "2. Set up web search (optional): scripts/setup/setup-brave-search.sh"
-echo "3. Install Desktop UI (optional): scripts/setup/install-goose-ui.sh"
+echo "1. Set up web search (optional): scripts/setup-brave-search.sh"
+echo "2. Install Desktop UI (optional): scripts/install-goose-ui.sh"
 echo "4. Validate setup: ./validate.sh"
 echo "5. Start Goose: ./run-goose.sh"
 echo ""
