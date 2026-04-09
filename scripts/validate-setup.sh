@@ -96,7 +96,7 @@ else
 fi
 
 # Count cloud models via API (works for both local and Windows Ollama)
-CLOUD_COUNT=$(curl -sf "${OLLAMA_URL}/api/tags" 2>/dev/null | grep -o '"name":"[^"]*:cloud[^"]*"' | wc -l)
+CLOUD_COUNT=$(curl -sf "${OLLAMA_URL}/api/tags" 2>/dev/null | grep -o '"name":"[^"]*cloud[^"]*"' | wc -l)
 if [ "$CLOUD_COUNT" -gt 0 ]; then
     check_pass "$CLOUD_COUNT cloud model(s) available"
 else

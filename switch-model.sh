@@ -16,7 +16,7 @@ if ! curl -sf "${OLLAMA_URL}/api/tags" &>/dev/null; then
 fi
 
 # Get cloud models via API
-models=($(curl -sf "${OLLAMA_URL}/api/tags" 2>/dev/null | grep -oP '"name":"[^"]*:cloud[^"]*"' | sed 's/"name":"//;s/"//' | sort))
+models=($(curl -sf "${OLLAMA_URL}/api/tags" 2>/dev/null | grep -oP '"name":"[^"]*cloud[^"]*"' | sed 's/"name":"//;s/"//' | sort))
 
 if [ ${#models[@]} -eq 0 ]; then
     echo "No cloud models found. Ensure Ollama is running with cloud models pulled."

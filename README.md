@@ -24,6 +24,14 @@ Setup handles everything: Ollama, latest cloud models from ollama.com, Python ve
 
 You'll be prompted to run `ollama signin` during setup — sign up free at [ollama.com](https://ollama.com).
 
+After setup, use `goose-cloud` from **any directory**:
+
+```bash
+cd ~/my-project
+goose-cloud                    # start a session in the current directory
+goose-cloud --name my-project  # named session
+```
+
 ---
 
 ## WSL2 Setup

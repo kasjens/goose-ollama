@@ -270,7 +270,7 @@ fi
 # Show available models and let user choose
 if [ "$WINDOWS_OLLAMA" = true ]; then
     # Get installed models via API (works regardless of local CLI auth)
-    INSTALLED=$(curl -sf "${OLLAMA_URL}/api/tags" 2>/dev/null | grep -oP '"name"\s*:\s*"[^"]*:cloud[^"]*"' | sed 's/"name"\s*:\s*"//;s/"//' | sort)
+    INSTALLED=$(curl -sf "${OLLAMA_URL}/api/tags" 2>/dev/null | grep -oP '"name"\s*:\s*"[^"]*cloud[^"]*"' | sed 's/"name"\s*:\s*"//;s/"//' | sort)
 else
     INSTALLED=$(ollama list 2>/dev/null | grep ":.*cloud" | awk '{print $1}')
 fi
@@ -461,6 +461,9 @@ if [ ! -f "$HOME/.config/goose/config.yaml" ]; then
 else
     ok "Goose config already exists"
 fi
+
+# Install global goose-cloud command
+bash "$PROJECT_DIR/scripts/install-global.sh"
 
 # ── 9. Optional extras ───────────────────────────────────────────
 step 9 "Optional extras..."

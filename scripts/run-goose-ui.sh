@@ -47,7 +47,7 @@ if ! curl -sf "${OLLAMA_URL}/api/tags" &>/dev/null; then
 fi
 
 # Check for cloud models via API
-CLOUD_MODELS=$(curl -sf "${OLLAMA_URL}/api/tags" 2>/dev/null | grep -o '"name":"[^"]*:cloud[^"]*"' | wc -l)
+CLOUD_MODELS=$(curl -sf "${OLLAMA_URL}/api/tags" 2>/dev/null | grep -o '"name":"[^"]*cloud[^"]*"' | wc -l)
 if [ "$CLOUD_MODELS" -eq 0 ]; then
     echo -e "${YELLOW}No cloud models found!${NC}"
     echo "Run: ollama signin && ollama pull qwen3.5:cloud"
@@ -59,8 +59,8 @@ fi
 # Show available models via API
 echo ""
 echo -e "${BLUE}Available Cloud Models:${NC}"
-curl -sf "${OLLAMA_URL}/api/tags" 2>/dev/null | grep -oP '"name":"[^"]*:cloud[^"]*"' | sed 's/"name":"//;s/"//' | sort | head -5 | while read -r m; do echo "  - $m"; done
-TOTAL_CLOUD=$(curl -sf "${OLLAMA_URL}/api/tags" 2>/dev/null | grep -o '"name":"[^"]*:cloud[^"]*"' | wc -l)
+curl -sf "${OLLAMA_URL}/api/tags" 2>/dev/null | grep -oP '"name":"[^"]*cloud[^"]*"' | sed 's/"name":"//;s/"//' | sort | head -5 | while read -r m; do echo "  - $m"; done
+TOTAL_CLOUD=$(curl -sf "${OLLAMA_URL}/api/tags" 2>/dev/null | grep -o '"name":"[^"]*cloud[^"]*"' | wc -l)
 if [ "$TOTAL_CLOUD" -gt 5 ]; then
     echo "  - ... and $((TOTAL_CLOUD - 5)) more"
 fi
