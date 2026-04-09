@@ -1,0 +1,32 @@
+# Goose Hints - Project Conventions
+
+## Language & Output
+- Input documents (tenders/requirements) are in **Danish**.
+- All analysis, summaries, and generated content must be in **English**.
+- Always cite requirements by their **ID** (e.g., REQ-001, Krav 3.2) when referencing them.
+
+## Output Formats
+- Default output: **spreadsheet** (.xlsx) or **section files** in `docs/proposal/sections/`.
+- Proposal section files go in `docs/proposal/sections/` (one file per section).
+- Use spreadsheets for comparison matrices, scoring, compliance tracking, and requirement mappings.
+
+## Decision Tracking
+- The decision tracking spreadsheet is **not in this repo** — it is maintained externally.
+- Do not create a `docs/decisions/` folder. Ask the user to provide the spreadsheet when needed.
+
+## Model Performance
+- If a response stalls or times out, break the task into smaller steps.
+- Avoid generating very large single outputs — split into multiple files instead.
+- Keep tool usage minimal per turn when working with cloud models.
+
+## Project Structure
+```
+docs/
+  proposal/
+    sections/       # Individual proposal section files
+  BEST-PRACTICES.md
+  WEB-SEARCH-GUIDE.md
+config/             # Goose config template, requirements
+scripts/            # Setup and utility scripts
+.agents/skills/     # Auto-discovered Goose skills
+```

@@ -88,5 +88,10 @@ fi
 export GOOSE_PROVIDER=ollama
 export GOOSE_MODEL=qwen3.5:cloud
 
+# Performance: prevent stream stalls with cloud models (see docs/BEST-PRACTICES.md)
+export GOOSE_REQUEST_TIMEOUT=300
+export OLLAMA_KEEP_ALIVE=300
+export OLLAMA_CONTEXT_LENGTH=32768
+
 # Run Goose session with detected installation
 "$GOOSE_CMD" session --name minimax-ollama

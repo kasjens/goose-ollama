@@ -68,5 +68,10 @@ if (Test-Path $venvActivate) {
 $env:GOOSE_PROVIDER = "ollama"
 $env:GOOSE_MODEL = "qwen3.5:cloud"
 
+# Performance: prevent stream stalls with cloud models (see docs/BEST-PRACTICES.md)
+$env:GOOSE_REQUEST_TIMEOUT = "300"
+$env:OLLAMA_KEEP_ALIVE = "300"
+$env:OLLAMA_CONTEXT_LENGTH = "32768"
+
 # Launch Goose
 goose session --name minimax-ollama

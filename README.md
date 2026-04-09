@@ -119,6 +119,8 @@ goose-ollama/
 
 **PowerShell scripts disabled** — `Set-ExecutionPolicy RemoteSigned -Scope CurrentUser`
 
+**Stream stalls / "no data received for 30s"** — Too many extensions inflating the payload. Disable unused extensions in `config/goose-config-template.yaml` (keep `todo`, `developer`, `analyze`). See [docs/BEST-PRACTICES.md](docs/BEST-PRACTICES.md#stream-stalls-with-cloud-models) for details.
+
 **Skills missing in Desktop UI** — Verify `~/.agents` symlink exists and points to the project's `.agents/` directory.
 
 **Python venv fails on WSL2** — Delete and re-run: `rm -rf ~/.local/share/goose-ollama/venv && ./setup.sh`

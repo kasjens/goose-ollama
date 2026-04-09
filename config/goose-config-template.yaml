@@ -16,7 +16,7 @@ extensions:
     bundled: true
     available_tools: []
   apps:
-    enabled: true
+    enabled: false
     type: platform
     name: apps
     description: Create and manage custom Goose apps through chat. Apps are HTML/CSS/JavaScript and run in sandboxed windows.
@@ -48,7 +48,7 @@ extensions:
     bundled: true
     available_tools: []
   extensionmanager:
-    enabled: true
+    enabled: false
     type: platform
     name: Extension Manager
     description: Enable extension management tools for discovering, enabling, and disabling extensions
@@ -56,7 +56,7 @@ extensions:
     bundled: true
     available_tools: []
   tom:
-    enabled: true
+    enabled: false
     type: platform
     name: tom
     description: Inject custom context into every turn via GOOSE_MOIM_MESSAGE_TEXT and GOOSE_MOIM_MESSAGE_FILE environment variables
@@ -64,7 +64,7 @@ extensions:
     bundled: true
     available_tools: []
   summon:
-    enabled: true
+    enabled: false
     type: platform
     name: summon
     description: Load knowledge and delegate tasks to subagents

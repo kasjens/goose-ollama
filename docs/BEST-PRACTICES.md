@@ -472,6 +472,28 @@ export OLLAMA_LOAD_BALANCE=true
 
 ### Common Issues
 
+#### Stream Stalls with Cloud Models
+The error "Ollama stream stalled: no data received for 30s" means the model is overwhelmed by the request payload. The 30s timeout is hardcoded in Goose ([block/goose#7635](https://github.com/block/goose/issues/7635)).
+
+**Fixes (in priority order):**
+
+1. **Reduce enabled extensions** — Each extension adds tool definitions to every request. In `config/goose-config-template.yaml`, keep only `todo`, `developer`, and `analyze` enabled. Disable `apps`, `extensionmanager`, `tom`, and `summon` unless actively needed. This cuts system prompt size roughly in half.
+
+2. **Set performance environment variables** (already added to run scripts):
+```bash
+export GOOSE_REQUEST_TIMEOUT=300      # Request timeout (seconds)
+export OLLAMA_KEEP_ALIVE=300          # Keep model loaded (seconds)
+export OLLAMA_CONTEXT_LENGTH=32768    # Context window size
+```
+
+3. **Break large outputs into smaller steps** — Use `.goosehints` to instruct the model to never generate files longer than 200 lines in a single response and to split large tasks into sequential steps.
+
+4. **Try a faster cloud model** — `deepseek-v3.2:cloud` has faster time-to-first-token than `qwen3.5:cloud` and is less likely to trigger the 30s stall.
+
+5. **Enable `code_execution` extension** — Described as "saving tokens" by having the model write code instead of using tool schemas. Can reduce payload overhead.
+
+**Known bug:** [block/goose#6117](https://github.com/block/goose/issues/6117) — Goose sends tool definitions even in chat mode during streaming, inflating payloads unnecessarily.
+
 #### High Memory Usage
 ```bash
 # Check model memory usage
