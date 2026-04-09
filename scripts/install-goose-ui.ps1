@@ -28,7 +28,7 @@ Write-Host ""
 
 # Get latest release download URL for Windows installer
 $ErrorActionPreference = "Continue"
-$release = Invoke-RestMethod -Uri "https://api.github.com/repos/block/goose/releases/latest" -UseBasicParsing
+$release = Invoke-RestMethod -Uri "https://api.github.com/repos/aaif-goose/goose/releases/latest" -UseBasicParsing
 $ErrorActionPreference = "Stop"
 
 # Windows Desktop app is Goose-win32-x64.zip

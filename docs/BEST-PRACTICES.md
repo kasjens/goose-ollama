@@ -473,7 +473,7 @@ export OLLAMA_LOAD_BALANCE=true
 ### Common Issues
 
 #### Stream Stalls with Cloud Models
-The error "Ollama stream stalled: no data received for 30s" means the model is overwhelmed by the request payload. The 30s timeout is hardcoded in Goose ([block/goose#7635](https://github.com/block/goose/issues/7635)).
+The error "Ollama stream stalled: no data received for 30s" means the model is overwhelmed by the request payload. The 30s timeout is hardcoded in Goose ([block/goose#7635](https://github.com/aaif-goose/goose/issues/7635)).
 
 **Fixes (in priority order):**
 
@@ -492,7 +492,7 @@ export OLLAMA_CONTEXT_LENGTH=32768    # Context window size
 
 5. **Enable `code_execution` extension** — Described as "saving tokens" by having the model write code instead of using tool schemas. Can reduce payload overhead.
 
-**Known bug:** [block/goose#6117](https://github.com/block/goose/issues/6117) — Goose sends tool definitions even in chat mode during streaming, inflating payloads unnecessarily.
+**Known bug:** [block/goose#6117](https://github.com/aaif-goose/goose/issues/6117) — Goose sends tool definitions even in chat mode during streaming, inflating payloads unnecessarily.
 
 #### High Memory Usage
 ```bash
@@ -584,7 +584,7 @@ Scripts running on `/mnt/c` (Windows NTFS) have these known issues:
 
 ### Community Resources
 - [Ollama Discord](https://discord.gg/ollama)
-- [Goose GitHub Discussions](https://github.com/block/goose/discussions)
+- [Goose GitHub Discussions](https://github.com/aaif-goose/goose/discussions)
 - [MiniMax Developer Community](https://developers.minimaxi.com/)
 
 ### Performance Benchmarks

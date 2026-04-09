@@ -300,7 +300,7 @@ if (Get-Command goose -ErrorAction SilentlyContinue) {
     New-Item -ItemType Directory -Path $gooseDir -Force | Out-Null
 
     $zipPath = Join-Path $env:TEMP "goose-windows.zip"
-    $url = "https://github.com/block/goose/releases/latest/download/goose-x86_64-pc-windows-msvc.zip"
+    $url = "https://github.com/aaif-goose/goose/releases/latest/download/goose-x86_64-pc-windows-msvc.zip"
     Write-Host "  Downloading Windows binary..."
     Invoke-WebRequest -Uri $url -OutFile $zipPath -UseBasicParsing
 

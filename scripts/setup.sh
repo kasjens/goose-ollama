@@ -422,7 +422,7 @@ else
     mkdir -p "$HOME/.local/bin"
     GOOSE_TMP="/tmp/goose-install-$$"
     mkdir -p "$GOOSE_TMP"
-    GOOSE_URL="https://github.com/block/goose/releases/latest/download/goose-x86_64-unknown-linux-gnu.tar.bz2"
+    GOOSE_URL="https://github.com/aaif-goose/goose/releases/latest/download/goose-x86_64-unknown-linux-gnu.tar.bz2"
     echo "  Downloading Linux binary..."
     curl -fSL "$GOOSE_URL" -o "$GOOSE_TMP/goose.tar.bz2" || fail "Download failed"
     echo "  Extracting..."

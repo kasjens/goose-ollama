@@ -1,6 +1,6 @@
 # Goose AI with Ollama Cloud Models
 
-AI development environment using [Goose AI](https://github.com/block/goose) with [Ollama](https://ollama.com) cloud models. No GPU needed — inference runs on Ollama's servers. Includes 31 auto-discovered skills for documents, web dev, mobile apps, creative design, and more.
+AI development environment using [Goose AI](https://github.com/aaif-goose/goose) with [Ollama](https://ollama.com) cloud models. No GPU needed — inference runs on Ollama's servers. Includes 31 auto-discovered skills for documents, web dev, mobile apps, creative design, and more.
 
 ## Quick Start
 

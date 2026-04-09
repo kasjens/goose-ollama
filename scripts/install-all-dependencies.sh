@@ -218,7 +218,7 @@ else
     GOOSE_TMP="/tmp/goose-install-$$"
     mkdir -p "$GOOSE_TMP"
     echo "Downloading Linux binary..."
-    curl -fSL "https://github.com/block/goose/releases/latest/download/goose-x86_64-unknown-linux-gnu.tar.bz2" \
+    curl -fSL "https://github.com/aaif-goose/goose/releases/latest/download/goose-x86_64-unknown-linux-gnu.tar.bz2" \
         -o "$GOOSE_TMP/goose.tar.bz2"
     cd "$GOOSE_TMP"
     tar -xjf goose.tar.bz2
