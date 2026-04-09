@@ -78,6 +78,77 @@ WRAPPER_EOF
 
 chmod +x "$WRAPPER"
 
+# Also install goose-switch (model switcher)
+SWITCHER="$HOME/.local/bin/goose-switch"
+cat > "$SWITCHER" << 'SWITCHER_EOF'
+#!/bin/bash
+
+# goose-switch — Switch Ollama cloud model from any directory.
+
+CONFIG_FILE="$HOME/.config/goose/config.yaml"
+
+# Detect Ollama URL
+OLLAMA_URL="http://localhost:11434"
+if ! curl -sf "${OLLAMA_URL}/api/tags" &>/dev/null; then
+    WIN_HOST_IP=$(ip route show default 2>/dev/null | awk '{print $3}')
+    if [ -n "$WIN_HOST_IP" ] && curl -sf "http://${WIN_HOST_IP}:11434/api/tags" &>/dev/null; then
+        OLLAMA_URL="http://${WIN_HOST_IP}:11434"
+    else
+        echo "Ollama is not reachable."
+        exit 1
+    fi
+fi
+
+echo "Available Ollama Cloud Models:"
+echo "=================================="
+
+models=($(curl -sf "${OLLAMA_URL}/api/tags" 2>/dev/null | grep -oP '"name":"[^"]*cloud[^"]*"' | sed 's/"name":"//;s/"//' | sort))
+
+if [ ${#models[@]} -eq 0 ]; then
+    echo "No cloud models found."
+    exit 1
+fi
+
+CURRENT=$(grep "^GOOSE_MODEL:" "$CONFIG_FILE" 2>/dev/null | awk '{print $2}')
+
+for i in "${!models[@]}"; do
+    marker=""
+    [ "${models[$i]}" = "$CURRENT" ] && marker=" (CURRENT)"
+    echo "$((i+1))) ${models[$i]}$marker"
+done
+
+echo ""
+read -r -p "Select model [1-${#models[@]}]: " choice </dev/tty
+echo ""
+
+if [[ $choice =~ ^[0-9]+$ ]] && [ "$choice" -le "${#models[@]}" ] && [ "$choice" -gt 0 ]; then
+    selected_model="${models[$((choice-1))]}"
+
+    mkdir -p "$(dirname "$CONFIG_FILE")"
+    if [ -f "$CONFIG_FILE" ] && grep -q "^GOOSE_MODEL:" "$CONFIG_FILE" 2>/dev/null; then
+        tmpfile=$(mktemp /tmp/goose-config.XXXXXX)
+        sed "s/^GOOSE_MODEL: .*/GOOSE_MODEL: $selected_model/" "$CONFIG_FILE" > "$tmpfile"
+        cp "$tmpfile" "$CONFIG_FILE"
+        rm -f "$tmpfile"
+    elif [ -f "$CONFIG_FILE" ]; then
+        echo "GOOSE_MODEL: $selected_model" >> "$CONFIG_FILE"
+    else
+        echo "GOOSE_MODEL: $selected_model" > "$CONFIG_FILE"
+    fi
+
+    VERIFY=$(grep "^GOOSE_MODEL:" "$CONFIG_FILE" 2>/dev/null | awk '{print $2}')
+    if [ "$VERIFY" = "$selected_model" ]; then
+        echo "Switched to: $selected_model"
+    else
+        echo "Config update failed. Run: export GOOSE_MODEL=$selected_model && goose-cloud"
+    fi
+else
+    echo "Invalid selection"
+fi
+SWITCHER_EOF
+
+chmod +x "$SWITCHER"
+
 # Ensure ~/.local/bin is in PATH
 if ! echo "$PATH" | grep -q "$HOME/.local/bin"; then
     for rc in "$HOME/.bashrc" "$HOME/.zshrc"; do
@@ -88,9 +159,11 @@ if ! echo "$PATH" | grep -q "$HOME/.local/bin"; then
 fi
 
 echo -e "${GREEN}Installed:${NC} $WRAPPER"
+echo -e "${GREEN}Installed:${NC} $SWITCHER"
 echo ""
 echo "Usage (from any directory):"
 echo "  goose-cloud                    # start a new session"
 echo "  goose-cloud --name my-project  # named session"
+echo "  goose-switch                   # switch cloud model"
 echo ""
 echo "Restart your shell or run: export PATH=\"\$HOME/.local/bin:\$PATH\""
