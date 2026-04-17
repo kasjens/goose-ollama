@@ -470,6 +470,41 @@ if ($braveReply -eq 'y' -or $braveReply -eq 'Y') {
     Ok "Skipped (run scripts\setup-brave-search.ps1 later if needed)"
 }
 
+Write-Host ""
+$claudeReply = Read-Host "  Install Claude Code CLI (enables 'ollama launch claude')? [y/N]"
+if ($claudeReply -eq 'y' -or $claudeReply -eq 'Y') {
+    if (Get-Command claude -ErrorAction SilentlyContinue) {
+        Ok "Claude Code already installed ($(claude --version 2>&1 | Select-Object -First 1))"
+    } elseif (-not (Get-Command npm -ErrorAction SilentlyContinue)) {
+        Warn "npm not found - install Node.js first (scripts\install-all-dependencies.ps1), then: npm install -g @anthropic-ai/claude-code"
+    } else {
+        Write-Host "  Running: npm install -g @anthropic-ai/claude-code ..."
+        $ErrorActionPreference = "Continue"
+        npm install -g @anthropic-ai/claude-code 2>&1 | Select-Object -Last 3
+        $installExit = $LASTEXITCODE
+        $ErrorActionPreference = "Stop"
+        if ($installExit -eq 0) {
+            # Claude Code drops a native binary at ~\.local\bin\claude.exe on Windows
+            # but does NOT add that directory to PATH. Persist it in user PATH.
+            $claudeBin = Join-Path $env:USERPROFILE ".local\bin"
+            if (Test-Path (Join-Path $claudeBin "claude.exe")) {
+                $userPath = [System.Environment]::GetEnvironmentVariable("Path", "User")
+                if ($userPath -notlike "*$claudeBin*") {
+                    [System.Environment]::SetEnvironmentVariable("Path", "$claudeBin;$userPath", "User")
+                    Ok "Added $claudeBin to user PATH"
+                }
+                $env:Path = "$claudeBin;$env:Path"
+            }
+            Refresh-Path
+            Ok "Claude Code installed - run 'ollama launch claude' or 'claude'"
+        } else {
+            Fail "Claude Code install failed. See https://code.claude.com/docs/en/quickstart"
+        }
+    }
+} else {
+    Ok "Skipped (install later with: npm install -g @anthropic-ai/claude-code)"
+}
+
 # -- Done ---------------------------------------------------------------------
 Write-Host ""
 Write-Host "Setup complete!" -ForegroundColor Green

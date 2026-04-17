@@ -560,6 +560,25 @@ else
     ok "Skipped (run scripts/setup-brave-search.sh later if needed)"
 fi
 
+echo ""
+read -r -p "  Install Claude Code CLI (enables 'ollama launch claude')? [y/N]: " INSTALL_CLAUDE </dev/tty
+if [[ $INSTALL_CLAUDE =~ ^[Yy]$ ]]; then
+    if command -v claude &>/dev/null; then
+        ok "Claude Code already installed ($(claude --version 2>&1 | head -1))"
+    elif ! command -v npm &>/dev/null; then
+        warn "npm not found — install Node.js first (scripts/install-all-dependencies.sh), then: npm install -g @anthropic-ai/claude-code"
+    else
+        echo "  Running: npm install -g @anthropic-ai/claude-code ..."
+        if npm install -g @anthropic-ai/claude-code 2>&1 | tail -3; then
+            ok "Claude Code installed — run 'ollama launch claude' or 'claude'"
+        else
+            fail "Claude Code install failed. See https://code.claude.com/docs/en/quickstart"
+        fi
+    fi
+else
+    ok "Skipped (install later with: npm install -g @anthropic-ai/claude-code)"
+fi
+
 # ── Done ──────────────────────────────────────────────────────────
 echo ""
 echo -e "${GREEN}Setup complete!${NC}"
