@@ -430,6 +430,14 @@ if (Test-Path $templatePath) {
         $content = $content -replace '(  skills:)', "$braveBlock`n`$1"
         Set-Content -Path $configPath -Value $content -NoNewline
     }
+    # Ensure OLLAMA_HOST has explicit port (without it, Goose falls back to port 1234)
+    $content = Get-Content $configPath -Raw
+    if ($content -match '(?m)^OLLAMA_HOST:') {
+        $content = $content -replace '(?m)^OLLAMA_HOST: .*', 'OLLAMA_HOST: localhost:11434'
+    } else {
+        $content = $content.TrimEnd() + "`nOLLAMA_HOST: localhost:11434`n"
+    }
+    Set-Content $configPath $content -NoNewline
     Ok "Goose config applied to $configPath"
     # Clean up stale pre-1.30 config so users aren't confused
     $stalePath = Join-Path $env:USERPROFILE ".config\goose\config.yaml"

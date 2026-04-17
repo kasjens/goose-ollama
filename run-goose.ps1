@@ -66,6 +66,8 @@ if (Test-Path $venvActivate) {
 
 # Set Goose env vars
 $env:GOOSE_PROVIDER = "ollama"
+# Always set OLLAMA_HOST with explicit port — without it Goose may fall back to port 1234
+$env:OLLAMA_HOST = "localhost:11434"
 # Read model from the config file Goose actually uses (path changed in 1.30)
 $configPath = $null
 try {
