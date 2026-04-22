@@ -29,6 +29,27 @@ function Get-RealCommand {
     } | Select-Object -First 1
 }
 
+# Under $ErrorActionPreference = "Stop", PS 5.1 turns *any* stderr output from a
+# native command (git's "Cloning into...", winget progress, etc.) into a
+# terminating NativeCommandError - even when the command exits 0. This helper
+# runs a native command with EAP temporarily relaxed, suppresses stderr, and
+# throws only if the real exit code is non-zero.
+function Invoke-Native {
+    param(
+        [Parameter(Mandatory)][string]$FilePath,
+        [string[]]$ArgumentList = @(),
+        [string]$ErrorMessage = "Command failed: $FilePath"
+    )
+    $prevEAP = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        & $FilePath @ArgumentList 2>&1 | Out-Null
+        if ($LASTEXITCODE -ne 0) { throw "$ErrorMessage (exit $LASTEXITCODE)" }
+    } finally {
+        $ErrorActionPreference = $prevEAP
+    }
+}
+
 # -- 1. Prerequisites --------------------------------------------------------
 Step 1 "Checking prerequisites..."
 
@@ -36,7 +57,7 @@ Step 1 "Checking prerequisites..."
 $pythonCmd = Get-RealCommand python
 if (-not $pythonCmd) {
     Write-Host "  Installing Python..."
-    winget install Python.Python.3.12 --accept-source-agreements --accept-package-agreements --silent
+    Invoke-Native winget @("install","Python.Python.3.12","--accept-source-agreements","--accept-package-agreements","--silent") "winget failed to install Python"
     Refresh-Path
     $pythonCmd = Get-RealCommand python
 }
@@ -50,7 +71,7 @@ if ($pythonCmd) {
 # Git
 if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
     Write-Host "  Installing Git..."
-    winget install Git.Git --accept-source-agreements --accept-package-agreements --silent
+    Invoke-Native winget @("install","Git.Git","--accept-source-agreements","--accept-package-agreements","--silent") "winget failed to install Git"
     Refresh-Path
 }
 if (Get-Command git -ErrorAction SilentlyContinue) {
@@ -261,7 +282,7 @@ if (-not (Test-Path $venvActivate)) {
     $venvDir = Join-Path $PROJECT_DIR "venv"
     if (Test-Path $venvDir) { Remove-Item $venvDir -Recurse -Force }
     Write-Host "  Creating virtual environment..."
-    python -m venv venv
+    Invoke-Native $pythonCmd.Source @("-m","venv","venv") "python -m venv failed"
     if (-not (Test-Path $venvActivate)) {
         Fail "venv creation failed"
     }
@@ -293,11 +314,11 @@ if ($skillCount -eq 0) {
 
     if (-not (Test-Path "anthropic-skills")) {
         Write-Host "  Cloning Anthropic skills..."
-        git clone --depth 1 -q https://github.com/anthropics/skills.git anthropic-skills
+        Invoke-Native git @("clone","--depth","1","-q","https://github.com/anthropics/skills.git","anthropic-skills") "Failed to clone anthropic/skills"
     }
     if (-not (Test-Path "minimax-skills")) {
         Write-Host "  Cloning MiniMax skills..."
-        git clone --depth 1 -q https://github.com/MiniMax-AI/skills.git minimax-skills
+        Invoke-Native git @("clone","--depth","1","-q","https://github.com/MiniMax-AI/skills.git","minimax-skills") "Failed to clone MiniMax-AI/skills"
     }
 
     if (Test-Path "anthropic-skills\skills") {
@@ -316,7 +337,7 @@ if ($skillCount -eq 0) {
 # Junction in home directory so Desktop UI discovers skills
 $homeAgents = Join-Path $env:USERPROFILE ".agents"
 if (-not (Test-Path $homeAgents)) {
-    cmd /c mklink /J "$homeAgents" "$PROJECT_DIR\.agents" | Out-Null
+    cmd /c mklink /J "$homeAgents" "$PROJECT_DIR\.agents" 2>&1 | Out-Null
     Ok "Created .agents junction for Desktop UI skill discovery"
 } elseif ((Get-Item $homeAgents).Attributes -band [IO.FileAttributes]::ReparsePoint) {
     Ok ".agents junction already exists"
