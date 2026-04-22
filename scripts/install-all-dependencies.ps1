@@ -89,22 +89,33 @@ if (Get-Command ffmpeg -ErrorAction SilentlyContinue) {
     Write-Host "  !! FFmpeg install failed (optional - needed for media skills)" -ForegroundColor Yellow
 }
 
-# ImageMagick - portable zip (no admin)
-$magickDir = Join-Path $env:LOCALAPPDATA "Programs\ImageMagick"
-if (Test-Path $magickDir) { $env:Path = "$magickDir;$env:Path" }
-
+# ImageMagick - winget first (reliable), fall back to the latest GitHub
+# installer silently. The old imagemagick.org archive URL 404'd after upstream
+# switched portable zips to .7z which Expand-Archive can't read.
 if (-not (Get-Command magick -ErrorAction SilentlyContinue)) {
-    Write-Host "  Installing ImageMagick (portable)..."
-    $magickZip = Join-Path $env:TEMP "imagemagick.zip"
-    Invoke-WebRequest -Uri "https://imagemagick.org/archive/binaries/ImageMagick-7.1.1-47-portable-Q16-x64.zip" -OutFile $magickZip -UseBasicParsing
-    New-Item -ItemType Directory -Path $magickDir -Force | Out-Null
-    Expand-Archive -Path $magickZip -DestinationPath $magickDir -Force
-    Remove-Item $magickZip -ErrorAction SilentlyContinue
-    $userPath = [System.Environment]::GetEnvironmentVariable("Path", "User")
-    if ($userPath -notlike "*$magickDir*") {
-        [System.Environment]::SetEnvironmentVariable("Path", "$magickDir;$userPath", "User")
+    Write-Host "  Installing ImageMagick..."
+    $installed = $false
+    try {
+        winget install --id ImageMagick.ImageMagick -e --source winget `
+            --accept-source-agreements --accept-package-agreements --silent 2>&1 | Out-Null
+        if ($LASTEXITCODE -eq 0) { $installed = $true }
+    } catch { }
+    Refresh-Path
+
+    if (-not $installed -and -not (Get-Command magick -ErrorAction SilentlyContinue)) {
+        try {
+            Write-Host "  winget route unavailable - fetching latest installer from GitHub..."
+            $release = Invoke-RestMethod "https://api.github.com/repos/ImageMagick/ImageMagick/releases/latest" -UseBasicParsing
+            $asset = $release.assets | Where-Object { $_.name -match 'Q16-HDRI-x64-dll\.exe$' } | Select-Object -First 1
+            if ($asset) {
+                $magickExe = Join-Path $env:TEMP $asset.name
+                Invoke-WebRequest -Uri $asset.browser_download_url -OutFile $magickExe -UseBasicParsing
+                Start-Process -FilePath $magickExe -ArgumentList "/VERYSILENT","/NORESTART","/SUPPRESSMSGBOXES" -Wait
+                Remove-Item $magickExe -ErrorAction SilentlyContinue
+                Refresh-Path
+            }
+        } catch { }
     }
-    $env:Path = "$magickDir;$env:Path"
 }
 if (Get-Command magick -ErrorAction SilentlyContinue) {
     Write-Host "  OK ImageMagick installed" -ForegroundColor Green
