@@ -137,11 +137,42 @@ if ($ollamaCmd) {
 # -- 3. Ollama service -------------------------------------------------------
 Step 3 "Ensuring Ollama is running..."
 
-function Test-OllamaUp {
+function Test-PortListening {
+    param([string]$Address = "127.0.0.1", [int]$Port = 11434)
+    $tcp = New-Object System.Net.Sockets.TcpClient
     try {
-        $null = Invoke-RestMethod http://localhost:11434/api/tags -TimeoutSec 2
-        return $true
-    } catch { return $false }
+        $iar = $tcp.BeginConnect($Address, $Port, $null, $null)
+        if ($iar.AsyncWaitHandle.WaitOne(1500, $false) -and $tcp.Connected) {
+            $tcp.EndConnect($iar); return $true
+        }
+        return $false
+    } catch { return $false } finally { $tcp.Close() }
+}
+
+function Test-OllamaUp {
+    # First confirm something is listening on 11434. Then try an HTTP probe to
+    # confirm it's actually Ollama. The HTTP probe must bypass the system proxy
+    # - on corporate Windows boxes, IE/WinHTTP proxy routes localhost too,
+    # making Invoke-RestMethod time out on a local server that's actually up.
+    if (-not (Test-PortListening -Address "127.0.0.1" -Port 11434) -and
+        -not (Test-PortListening -Address "::1"       -Port 11434)) {
+        return $false
+    }
+    $prevProxy = [System.Net.WebRequest]::DefaultWebProxy
+    [System.Net.WebRequest]::DefaultWebProxy = New-Object System.Net.WebProxy
+    try {
+        foreach ($addr in @("127.0.0.1","localhost")) {
+            try {
+                $null = Invoke-RestMethod "http://${addr}:11434/api/tags" -TimeoutSec 3
+                return $true
+            } catch { }
+        }
+    } finally {
+        [System.Net.WebRequest]::DefaultWebProxy = $prevProxy
+    }
+    # Port is bound but HTTP probe failed - treat as up anyway; subsequent
+    # ollama CLI calls go over the CLI's own client, not Invoke-RestMethod.
+    return $true
 }
 
 function Wait-OllamaUp {
@@ -157,31 +188,42 @@ function Wait-OllamaUp {
 $ollamaUp = Test-OllamaUp
 
 if (-not $ollamaUp) {
-    # Try Windows Service if the installer registered one (name varies by version)
+    # 1) Prefer the Windows Service if the installer registered one (name
+    #    varies by version - OllamaService, Ollama, etc.)
     $svc = Get-Service -Name "Ollama*" -ErrorAction SilentlyContinue | Select-Object -First 1
     if ($svc -and $svc.Status -ne 'Running') {
         Write-Host "  Starting $($svc.Name) service..."
         Start-Service $svc.Name -ErrorAction SilentlyContinue
-    } else {
-        # Launch the Ollama tray app if present (it starts `ollama serve` itself);
-        # otherwise launch `ollama serve` directly in the background.
-        $trayExe = Join-Path (Split-Path $ollamaCmd.Source -Parent) "ollama app.exe"
-        if (Test-Path $trayExe) {
-            Write-Host "  Launching Ollama app..."
-            Start-Process -FilePath $trayExe -WindowStyle Hidden
-        } else {
-            Write-Host "  Starting ollama serve..."
-            Start-Process -FilePath $ollamaCmd.Source -ArgumentList "serve" -WindowStyle Hidden
-        }
+        Write-Host "  Waiting for Ollama API (up to 30s)..."
+        $ollamaUp = Wait-OllamaUp -TimeoutSec 30
     }
-    Write-Host "  Waiting for Ollama API (up to 30s)..."
-    $ollamaUp = Wait-OllamaUp -TimeoutSec 30
+
+    # 2) If no service or service route didn't bring the API up, run
+    #    `ollama serve` directly. We skip the tray app because newer
+    #    Ollama-for-Windows Desktop builds show a first-run login screen
+    #    that blocks `serve` from starting until the user clicks through.
+    if (-not $ollamaUp) {
+        Write-Host "  Starting ollama serve in background..."
+        $serveLog = Join-Path $env:TEMP "ollama-serve.log"
+        Start-Process -FilePath $ollamaCmd.Source -ArgumentList "serve" `
+            -WindowStyle Hidden `
+            -RedirectStandardOutput $serveLog `
+            -RedirectStandardError "$serveLog.err"
+        Write-Host "  Waiting for Ollama API (up to 60s)..."
+        $ollamaUp = Wait-OllamaUp -TimeoutSec 60
+    }
 }
 
 if ($ollamaUp) {
     Ok "Ollama service is running"
 } else {
-    Fail "Could not start Ollama. Open a new terminal and run: ollama serve"
+    Write-Host ""
+    Write-Host "  Hints:" -ForegroundColor Yellow
+    Write-Host "   - If the Ollama Desktop tray opened, click through its first-run"
+    Write-Host "     setup (EULA / sign-in) so it can start the API, then re-run setup."
+    Write-Host "   - Otherwise open a new terminal and run: ollama serve"
+    Write-Host "   - Serve log: $env:TEMP\ollama-serve.log(.err)"
+    Fail "Could not start Ollama on http://127.0.0.1:11434"
 }
 
 # -- 4. Ollama cloud sign-in -------------------------------------------------
