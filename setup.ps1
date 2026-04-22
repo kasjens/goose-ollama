@@ -19,17 +19,30 @@ function Refresh-Path {
                 [System.Environment]::GetEnvironmentVariable("Path","User")
 }
 
+# Get-Command finds Microsoft Store reparse stubs (e.g. python.exe in
+# WindowsApps\) that only print "Python was not found..." and exit non-zero.
+# This helper returns the resolved command, skipping those stubs.
+function Get-RealCommand {
+    param([string]$Name)
+    Get-Command $Name -All -ErrorAction SilentlyContinue | Where-Object {
+        $_.Source -and ($_.Source -notmatch '\\WindowsApps\\')
+    } | Select-Object -First 1
+}
+
 # -- 1. Prerequisites --------------------------------------------------------
 Step 1 "Checking prerequisites..."
 
-# Python
-if (-not (Get-Command python -ErrorAction SilentlyContinue)) {
+# Python - ignore the Microsoft Store reparse stub in WindowsApps\
+$pythonCmd = Get-RealCommand python
+if (-not $pythonCmd) {
     Write-Host "  Installing Python..."
     winget install Python.Python.3.12 --accept-source-agreements --accept-package-agreements --silent
     Refresh-Path
+    $pythonCmd = Get-RealCommand python
 }
-if (Get-Command python -ErrorAction SilentlyContinue) {
-    Ok "Python $(python --version 2>&1)"
+if ($pythonCmd) {
+    $pythonVer = try { (& $pythonCmd.Source --version 2>&1 | Out-String).Trim() } catch { "installed" }
+    Ok "Python $pythonVer"
 } else {
     Fail "Python not found. Install from https://www.python.org/downloads/"
 }
