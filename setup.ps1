@@ -63,14 +63,21 @@ if (Get-Command git -ErrorAction SilentlyContinue) {
 Step 2 "Checking Ollama..."
 
 Refresh-Path
-if (-not (Get-Command ollama -ErrorAction SilentlyContinue)) {
+$ollamaCmd = Get-RealCommand ollama
+if (-not $ollamaCmd) {
     Write-Host "  Installing Ollama (official installer)..."
     irm https://ollama.com/install.ps1 | iex
     Refresh-Path
-    Start-Sleep -Seconds 3
+    # Installer may not update the current session PATH - probe the canonical install dir too
+    $ollamaDefault = Join-Path $env:LOCALAPPDATA "Programs\Ollama"
+    if (Test-Path (Join-Path $ollamaDefault "ollama.exe")) {
+        $env:Path = "$ollamaDefault;$env:Path"
+    }
+    Start-Sleep -Seconds 2
+    $ollamaCmd = Get-RealCommand ollama
 }
-if (Get-Command ollama -ErrorAction SilentlyContinue) {
-    Ok "Ollama installed"
+if ($ollamaCmd) {
+    Ok "Ollama installed ($($ollamaCmd.Source))"
 } else {
     Fail "Ollama not found. Install from https://ollama.com/download"
 }
@@ -78,34 +85,51 @@ if (Get-Command ollama -ErrorAction SilentlyContinue) {
 # -- 3. Ollama service -------------------------------------------------------
 Step 3 "Ensuring Ollama is running..."
 
-$ollamaUp = $false
-try {
-    $null = Invoke-RestMethod http://localhost:11434/api/tags -TimeoutSec 3
-    $ollamaUp = $true
-} catch {}
+function Test-OllamaUp {
+    try {
+        $null = Invoke-RestMethod http://localhost:11434/api/tags -TimeoutSec 2
+        return $true
+    } catch { return $false }
+}
+
+function Wait-OllamaUp {
+    param([int]$TimeoutSec = 30)
+    $deadline = (Get-Date).AddSeconds($TimeoutSec)
+    while ((Get-Date) -lt $deadline) {
+        if (Test-OllamaUp) { return $true }
+        Start-Sleep -Seconds 1
+    }
+    return $false
+}
+
+$ollamaUp = Test-OllamaUp
 
 if (-not $ollamaUp) {
-    # Try Windows Service first
-    $svc = Get-Service -Name "Ollama" -ErrorAction SilentlyContinue
+    # Try Windows Service if the installer registered one (name varies by version)
+    $svc = Get-Service -Name "Ollama*" -ErrorAction SilentlyContinue | Select-Object -First 1
     if ($svc -and $svc.Status -ne 'Running') {
-        Start-Service "Ollama" -ErrorAction SilentlyContinue
-        Start-Sleep -Seconds 5
+        Write-Host "  Starting $($svc.Name) service..."
+        Start-Service $svc.Name -ErrorAction SilentlyContinue
     } else {
-        # Fall back to starting ollama serve in background
-        Write-Host "  Starting ollama serve..."
-        Start-Process ollama -ArgumentList "serve" -WindowStyle Hidden
-        Start-Sleep -Seconds 5
+        # Launch the Ollama tray app if present (it starts `ollama serve` itself);
+        # otherwise launch `ollama serve` directly in the background.
+        $trayExe = Join-Path (Split-Path $ollamaCmd.Source -Parent) "ollama app.exe"
+        if (Test-Path $trayExe) {
+            Write-Host "  Launching Ollama app..."
+            Start-Process -FilePath $trayExe -WindowStyle Hidden
+        } else {
+            Write-Host "  Starting ollama serve..."
+            Start-Process -FilePath $ollamaCmd.Source -ArgumentList "serve" -WindowStyle Hidden
+        }
     }
-    try {
-        $null = Invoke-RestMethod http://localhost:11434/api/tags -TimeoutSec 5
-        $ollamaUp = $true
-    } catch {}
+    Write-Host "  Waiting for Ollama API (up to 30s)..."
+    $ollamaUp = Wait-OllamaUp -TimeoutSec 30
 }
 
 if ($ollamaUp) {
     Ok "Ollama service is running"
 } else {
-    Fail "Could not start Ollama. Try manually: ollama serve"
+    Fail "Could not start Ollama. Open a new terminal and run: ollama serve"
 }
 
 # -- 4. Ollama cloud sign-in -------------------------------------------------
