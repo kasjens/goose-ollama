@@ -288,7 +288,7 @@ if (-not (Test-Path $homeAgents)) {
 # -- 8. Goose AI --------------------------------------------------------------
 Step 8 "Checking Goose AI (always fetching latest release)..."
 
-# Force TLS 1.2 — PowerShell 5.1 defaults to TLS 1.0 which GitHub rejects,
+# Force TLS 1.2 - PowerShell 5.1 defaults to TLS 1.0 which GitHub rejects,
 # causing the release-check API call to fail silently in earlier runs.
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
@@ -296,7 +296,7 @@ $gooseDir = Join-Path $env:LOCALAPPDATA "Programs\goose"
 # Add to session PATH
 if (Test-Path $gooseDir) { $env:Path = "$gooseDir;$env:Path" }
 
-# Always query GitHub for the latest release tag — never pins to a fixed version.
+# Always query GitHub for the latest release tag - never pins to a fixed version.
 Write-Host "  Querying GitHub for the latest Goose release..."
 $latestTag = $null
 try {
@@ -304,7 +304,7 @@ try {
     $latestTag = $releaseInfo.tag_name -replace '^v', ''
     if ($latestTag) { Write-Host "  Latest Goose release on GitHub: $latestTag" }
 } catch {
-    Warn "Could not query GitHub ($($_.Exception.Message)) — will still attempt install"
+    Warn "Could not query GitHub ($($_.Exception.Message)) - will still attempt install"
 }
 
 $currentVer = $null
@@ -341,7 +341,7 @@ if ($needsInstall -or $needsUpdate) {
     # Stop any running goose processes before we overwrite.
     $running = Get-Process -Name goose -ErrorAction SilentlyContinue
     if ($running) {
-        Warn "goose.exe is running — stopping $($running.Count) process(es) so the update can land"
+        Warn "goose.exe is running - stopping $($running.Count) process(es) so the update can land"
         $running | Stop-Process -Force -ErrorAction SilentlyContinue
         Start-Sleep -Milliseconds 500
     }
@@ -386,7 +386,7 @@ if ($needsInstall -or $needsUpdate) {
 }
 
 # Apply config template (preserves GOOSE_MODEL + brave-search if already set)
-# Ask Goose where its config lives — path changed in 1.30 (now %APPDATA%\Block\goose\config)
+# Ask Goose where its config lives - path changed in 1.30 (now %APPDATA%\Block\goose\config)
 $configPath = $null
 try {
     $infoOut = (& goose info 2>&1 | Out-String)
